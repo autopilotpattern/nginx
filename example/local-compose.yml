@@ -1,0 +1,40 @@
+# This demonstration of triton-nginx has port mappings so we can test it
+# on docker-machine locally.
+
+consul:
+    extends:
+      file: docker-compose.yml
+      service: consul
+    ports:
+    - 8500:8500
+
+nginx:
+    build: ..
+    mem_limit: 512m
+    expose:
+    - 80
+    ports:
+    - 8080:80
+    links:
+    - consul:consul
+    restart: always
+    environment:
+    - CONTAINERBUDDY
+    command: >
+      /opt/containerbuddy/containerbuddy
+      nginx -g "daemon off;"
+
+app:
+    image: 0x74696d/containerbuddy-demo-app
+    mem_limit: 512m
+    expose:
+    - 8000
+    ports:
+    - 8000:8000
+    links:
+    - consul:consul
+    restart: always
+    command: >
+      /opt/containerbuddy/containerbuddy
+      -config file:///opt/containerbuddy/app.json
+      /usr/local/bin/node /usr/local/bin/http-server /srv -p 8000
