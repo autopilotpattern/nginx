@@ -13,13 +13,13 @@ RUN curl -Lo /tmp/consul_template_0.11.0_linux_amd64.zip https://github.com/hash
     mv consul-template /bin
 
 # get Containerbuddy release
-RUN export CB=containerbuddy-0.0.1-alpha &&\
+RUN export CB=containerbuddy-0.0.2-alpha &&\
     mkdir -p /opt/containerbuddy && \
     curl -Lo /tmp/${CB}.tar.gz \
-    https://github.com/joyent/containerbuddy/releases/download/0.0.1-alpha/${CB}.tar.gz && \
-	tar xzf /tmp/${CB}.tar.gz -C /tmp && \
-    mv /tmp/build/containerbuddy /opt/containerbuddy/
+    https://github.com/joyent/containerbuddy/releases/download/0.0.2-alpha/${CB}.tar.gz && \
+	tar -xf /tmp/${CB}.tar.gz && \
+    mv /build/containerbuddy /opt/containerbuddy/
 
-# add our configuration files
-COPY config/containerbuddy /opt/containerbuddy/
-COPY config/nginx/conf.d /etc/nginx/conf.d/
+# Add our configuration files and scripts
+ADD /etc/containerbuddy.json /etc/containerbuddy.json
+ADD /bin/reload.sh /opt/containerbuddy/reload.sh

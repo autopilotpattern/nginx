@@ -6,6 +6,7 @@ nginx:
       file: common-compose.yml
       service: nginx
     build: ..
+    mem_limit: 128m
     links:
     - consul:consul
     ports:
@@ -15,6 +16,7 @@ app:
     extends:
       file: common-compose.yml
       service: app
+    mem_limit: 128m
     links:
     - consul:consul
     ports:

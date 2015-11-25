@@ -1,5 +1,6 @@
 {
   "consul": "consul:8500",
+  "onStart": "/opt/containerbuddy/reload.sh",
   "services": [
     {
       "name": "nginx",
@@ -14,7 +15,7 @@
     {
       "name": "app",
       "poll": 7,
-      "onChange": "/opt/containerbuddy/reload-nginx.sh"
+      "onChange": "/opt/containerbuddy/reload.sh"
     }
   ]
 }

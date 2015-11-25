@@ -9,6 +9,7 @@ nginx:
     restart: always
     environment:
     - CONTAINERBUDDY
+    - NGINX_CONF
     command: >
       /opt/containerbuddy/containerbuddy
       nginx -g "daemon off;"
@@ -17,7 +18,7 @@ app:
     image: 0x74696d/containerbuddy-demo-app
     mem_limit: 512m
     expose:
-    - 8000 # no strictly necessary because we don't link
+    - 8000 # not strictly necessary because we don't link
     restart: always
     command: >
       /opt/containerbuddy/containerbuddy
