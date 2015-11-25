@@ -1,43 +1,24 @@
-consul:
-    image: progrium/consul:latest
-    command: >
-      -server
-      -bootstrap-expect 1
-      -ui-dir /ui
-    mem_limit: 256m
-    ports:
-    - 53
-    - 8300
-    - 8301
-    - 8302
-    - 8400
-    - 8500
-    - 8600
-    restart: always
+# Nginx example application for demonstrating container-native
+# deployment on Joyent's Triton platform.
 
 nginx:
-    image: 0x74696d/triton-nginx
-    mem_limit: 512m
-    ports:
-    - 80
+    extends:
+      file: common-compose.yml
+      service: nginx
     links:
-    - consul:consul
-    restart: always
-    environment:
-    - CONTAINERBUDDY
-    command: >
-      /opt/containerbuddy/containerbuddy
-      nginx -g "daemon off;"
+    - consul:consul # we'll remove this once TCNS goes live
 
 app:
-    image: 0x74696d/containerbuddy-demo-app
-    mem_limit: 512m
-    ports:
-    - 8000
+    extends:
+      file: common-compose.yml
+      service: app
     links:
-    - consul:consul
-    restart: always
-    command: >
-      /opt/containerbuddy/containerbuddy
-      -config file:///opt/containerbuddy/app.json
-      /usr/local/bin/node /usr/local/bin/http-server /srv -p 8000
+    - consul:consul # we'll remove this once TCNS goes live
+
+# ---------------------------------------------------
+# Consul as a service discovery tier
+
+consul:
+    extends:
+      file: common-compose.yml
+      service: consul
