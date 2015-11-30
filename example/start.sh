@@ -9,19 +9,6 @@ export NGINX_CONF="$(cat ./nginx.ctmpl)"
 
 docker-compose up -d
 
-poll-for-page() {
-    echo "$2"
-    while :
-    do
-        curl --fail -s -o /dev/null "$1" && break
-        sleep 1
-        echo -ne .
-    done
-    echo
-    echo "$3"
-    open "$1"
-}
-
 # poll Consul for liveness and then open the console
 poll-for-page "http://$(getIpPort consul 8500)/ui/" \
               'Waiting for Consule...' \

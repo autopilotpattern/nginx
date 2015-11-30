@@ -40,6 +40,20 @@ getIpPort() {
     echo "$ip:$port"
 }
 
+# usage: poll-for-page <url> <pre-message> <post-message>
+poll-for-page() {
+    echo "$2"
+    while :
+    do
+        curl --fail -s -o /dev/null "$1" && break
+        sleep 1
+        echo -ne .
+    done
+    echo
+    echo "$3"
+    open "$1"
+}
+
 # default values which can be overriden by -f or -p flags
 export COMPOSE_FILE=
 
