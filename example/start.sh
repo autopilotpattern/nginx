@@ -11,7 +11,7 @@ docker-compose up -d
 
 # poll Consul for liveness and then open the console
 poll-for-page "http://$(getIpPort consul 8500)/ui/" \
-              'Waiting for Consule...' \
+              'Waiting for Consul...' \
               'Opening Consul console... Refresh the page to watch services register.'
 
 # poll Nginx for liveness and then open the page
