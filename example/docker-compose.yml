@@ -1,0 +1,24 @@
+# Nginx example application for demonstrating container-native
+# deployment on Joyent's Triton platform.
+
+nginx:
+    extends:
+      file: common-compose.yml
+      service: nginx
+    links:
+    - consul:consul # we'll remove this once TCNS goes live
+
+app:
+    extends:
+      file: common-compose.yml
+      service: app
+    links:
+    - consul:consul # we'll remove this once TCNS goes live
+
+# ---------------------------------------------------
+# Consul as a service discovery tier
+
+consul:
+    extends:
+      file: common-compose.yml
+      service: consul
