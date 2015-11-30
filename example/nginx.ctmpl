@@ -52,7 +52,7 @@ http {
 
         {{range services}}
         location = /{{.Name}} {
-            return 302 /{{.Name}}/;
+            return 301 /{{.Name}}/;
         }
 
         location /{{.Name}} {
