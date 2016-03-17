@@ -13,12 +13,14 @@ RUN curl -Lo /tmp/consul_template_0.11.0_linux_amd64.zip https://github.com/hash
     mv consul-template /bin
 
 # get Containerbuddy release
-RUN export CB=containerbuddy-0.0.2-alpha &&\
-    mkdir -p /opt/containerbuddy && \
-    curl -Lo /tmp/${CB}.tar.gz \
-    https://github.com/joyent/containerbuddy/releases/download/0.0.2-alpha/${CB}.tar.gz && \
-	tar -xf /tmp/${CB}.tar.gz && \
-    mv /build/containerbuddy /opt/containerbuddy/
+ENV CONTAINERBUDDY_VERSION 1.2.1
+RUN export CB_SHA1=aca04b3c6d6ed66294241211237012a23f8b4f20 \
+    && mkdir -p /opt/containerbuddy \
+    && curl -Lso /tmp/containerbuddy.tar.gz \
+         "https://github.com/joyent/containerbuddy/releases/download/${CONTAINERBUDDY_VERSION}/containerbuddy-${CONTAINERBUDDY_VERSION}.tar.gz" \
+    && echo "${CB_SHA1}  /tmp/containerbuddy.tar.gz" | sha1sum -c \
+    && tar zxf /tmp/containerbuddy.tar.gz -C /opt/containerbuddy \
+    && rm /tmp/containerbuddy.tar.gz
 
 # Add our configuration files and scripts
 ADD /etc/containerbuddy.json /etc/containerbuddy.json
