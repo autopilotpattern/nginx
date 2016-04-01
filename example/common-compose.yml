@@ -2,7 +2,7 @@
 # deployment on Joyent's Triton platform.
 
 nginx:
-    image: 0x74696d/triton-nginx
+    image: autopilotpattern/nginx
     mem_limit: 512m
     ports:
     - 80
@@ -15,7 +15,7 @@ nginx:
       nginx -g "daemon off;"
 
 app:
-    image: 0x74696d/containerbuddy-demo-app
+    image: autopilotpattern/containerbuddy-demo-app
     mem_limit: 512m
     expose:
     - 8000 # not strictly necessary because we don't link

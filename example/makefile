@@ -23,5 +23,5 @@ run:
 
 # build and send up to the Docker Hub
 ship:
-	cd .. && docker build -t="0x74696d/triton-nginx" .
-	docker push 0x74696d/triton-nginx
+	cd .. && docker build -t="autopilotpattern/nginx" .
+	docker push autopilotpattern/nginx
