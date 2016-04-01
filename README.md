@@ -1,4 +1,4 @@
-triton-nginx
+Nginx autopilot pattern
 ==========
 
 *An Nginx container for container-native deployment and automatic backend discovery.*
