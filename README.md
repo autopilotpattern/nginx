@@ -1,7 +1,12 @@
-Nginx autopilot pattern
+Autopilot Pattern Nginx
 ==========
 
-*An Nginx container for container-native deployment and automatic backend discovery.*
+*A re-usable Nginx image implemented according to the [Autopilot Pattern](http://autopilotpattern.io/) for automatic discovery and configuration.*
+
+[![DockerPulls](https://img.shields.io/docker/pulls/autopilotpattern/nginx.svg)](https://registry.hub.docker.com/u/autopilotpattern/nginx/)
+[![DockerStars](https://img.shields.io/docker/stars/autopilotpattern/nginx.svg)](https://registry.hub.docker.com/u/autopilotpattern/nginx/)
+[![ImageLayers](https://badge.imagelayers.io/autopilotpattern/nginx:latest.svg)](https://imagelayers.io/?images=autopilotpattern/nginx:latest)
+[![Join the chat at https://gitter.im/autopilotpattern/nginx](https://badges.gitter.im/autopilotpattern/nginx.svg)](https://gitter.im/autopilotpattern/nginx)
 
 ### A reusable Nginx container image
 
