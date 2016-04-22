@@ -11,7 +11,7 @@ nginx:
     - CONTAINERBUDDY
     - NGINX_CONF
     command: >
-      /opt/containerbuddy/containerbuddy
+      /usr/local/bin/containerpilot
       nginx -g "daemon off;"
 
 app:

@@ -4,7 +4,7 @@
 export COMPOSE_PROJECT_NAME=nginx
 source common.sh
 
-export CONTAINERBUDDY="$(cat ../etc/containerbuddy.json)"
+export CONTAINEPILOT="$(cat ../etc/containerpilot.json)"
 export NGINX_CONF="$(cat ./nginx.ctmpl)"
 
 docker-compose up -d
