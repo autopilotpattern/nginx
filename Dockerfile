@@ -1,4 +1,4 @@
-# a minimal Nginx container including containerbuddy and a simple virtulhost config
+# a minimal Nginx container including containerpilot and a simple virtulhost config
 FROM nginx:latest
 
 # install curl
@@ -12,16 +12,15 @@ RUN curl -Lo /tmp/consul_template_0.11.0_linux_amd64.zip https://github.com/hash
     unzip /tmp/consul_template_0.11.0_linux_amd64.zip && \
     mv consul-template /bin
 
-# get Containerbuddy release
-ENV CONTAINERBUDDY_VERSION 1.2.1
-RUN export CB_SHA1=aca04b3c6d6ed66294241211237012a23f8b4f20 \
-    && mkdir -p /opt/containerbuddy \
-    && curl -Lso /tmp/containerbuddy.tar.gz \
-         "https://github.com/joyent/containerbuddy/releases/download/${CONTAINERBUDDY_VERSION}/containerbuddy-${CONTAINERBUDDY_VERSION}.tar.gz" \
-    && echo "${CB_SHA1}  /tmp/containerbuddy.tar.gz" | sha1sum -c \
-    && tar zxf /tmp/containerbuddy.tar.gz -C /opt/containerbuddy \
-    && rm /tmp/containerbuddy.tar.gz
+# Add Containerpilot and its configuration
+ENV CONTAINERPILOT_VER 2.0.1
+RUN export CONTAINERPILOT_CHECKSUM=a4dd6bc001c82210b5c33ec2aa82d7ce83245154 \
+    && curl -Lso /tmp/containerpilot.tar.gz \
+         "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
+    && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
+    && tar zxf /tmp/containerpilot.tar.gz -C /usr/local/bin \
+    && rm /tmp/containerpilot.tar.gz
 
 # Add our configuration files and scripts
-ADD /etc/containerbuddy.json /etc/containerbuddy.json
-ADD /bin/reload.sh /opt/containerbuddy/reload.sh
+ADD /etc/containerpilot.json /etc/containerpilot.json
+ADD /bin/reload.sh /usr/local/bin/reload.sh

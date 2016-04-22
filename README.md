@@ -10,12 +10,12 @@ Autopilot Pattern Nginx
 
 ### A reusable Nginx container image
 
-The goal of this project is to create an Nginx image that can be reused across environments without having to rebuild the entire image. Configuration of Nginx is entirely via Containerbuddy `onStart` or `onChange` handlers, which read the top-level Nginx configuration from either the `NGINX_CONF` environment variable or Consul.
+The goal of this project is to create an Nginx image that can be reused across environments without having to rebuild the entire image. Configuration of Nginx is entirely via ContainerPilot `onStart` or `onChange` handlers, which read the top-level Nginx configuration from either the `NGINX_CONF` environment variable or Consul.
 
 
 ### Running the example
 
-In the `examples` directory is a demonstration showing how Containerbuddy is used to knit together the components of a simple application. In this application, an Nginx node acts as a reverse proxy for any number of upstream application nodes. The application nodes register themselves with Consul as they come online, and the Nginx application is configured with an `onStart` and `onChange` handler that uses `consul-template` to write out a new Nginx configuration file and then gracefully reloads the configuration as needed.
+In the `examples` directory is a demonstration showing how ContainerPilot is used to knit together the components of a simple application. In this application, an Nginx node acts as a reverse proxy for any number of upstream application nodes. The application nodes register themselves with Consul as they come online, and the Nginx application is configured with an `onStart` and `onChange` handler that uses `consul-template` to write out a new Nginx configuration file and then gracefully reloads the configuration as needed.
 
 To try it yourself:
 
