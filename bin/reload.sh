@@ -10,7 +10,7 @@ preStart() {
     consul-template \
         -once \
         -consul ${CONSUL}:8500 \
-        -template "/tmp/nginx.ctmpl:/etc/nginx/nginx.conf"
+        -template "/etc/nginx/nginx.conf.ctmpl:/etc/nginx/nginx.conf"
 }
 
 # Render Nginx configuration template using values from Consul,
