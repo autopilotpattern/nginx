@@ -1,5 +1,5 @@
 {
-  "consul": "consul:8500",
+  "consul": "{{ .CONSUL }}:8500",
   "onStart": "/usr/local/bin/reload.sh preStart",
   "services": [
     {
@@ -13,7 +13,7 @@
   ],
   "backends": [
     {
-      "name": "app",
+      "name": "{{ .BACKEND }}",
       "poll": 7,
       "onChange": "/usr/local/bin/reload.sh"
     }

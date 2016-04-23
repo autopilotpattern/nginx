@@ -1,0 +1,5 @@
+# credentials
+_env*
+
+# macos frustration
+.DS_Store
