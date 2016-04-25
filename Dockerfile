@@ -4,6 +4,7 @@ FROM nginx:latest
 # Add some stuff via apt-get
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        bc \
         curl \
         unzip \
     && rm -rf /var/lib/apt/lists/*
