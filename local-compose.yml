@@ -1,0 +1,33 @@
+nginx:
+    extends:
+        file: docker-compose.yml
+        service: nginx
+    build: .
+    mem_limit: 128g
+    links:
+        - consul:consul
+    environment:
+        - CONSUL=consul
+    links:
+        - consul:consul
+    ports:
+        - 80:80
+
+app:
+    extends:
+        file: docker-compose.yml
+        service: app
+    mem_limit: 128m
+    environment:
+        - CONSUL=consul
+    links:
+        - consul:consul
+    ports:
+        - 8000:8000
+
+consul:
+    extends:
+        file: docker-compose.yml
+        service: consul
+    ports:
+        - 8500:8500

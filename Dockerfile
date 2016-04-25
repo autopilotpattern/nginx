@@ -32,3 +32,8 @@ RUN export CONTAINERPILOT_CHECKSUM=e7973bf036690b520b450c3a3e121fc7cd26f1a2 \
 # Add our configuration files and scripts
 COPY etc /etc
 COPY bin /usr/local/bin
+
+CMD [ "/usr/local/bin/containerpilot", \
+    "nginx", \
+        "-g", \
+        "daemon off;"]
