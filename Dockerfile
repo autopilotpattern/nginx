@@ -3,7 +3,7 @@ FROM nginx:latest
 
 # Add some stuff via apt-get
 RUN apt-get update \
-    && pt-get install -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
         curl \
         unzip \
     && rm -rf /var/lib/apt/lists/*
@@ -19,10 +19,10 @@ RUN curl --retry 7 -Lso /tmp/consul-template.zip "https://releases.hashicorp.com
     && rm /tmp/consul-template.zip
 
 # Add Containerpilot and set its configuration
-ENV CONTAINERPILOT_VER 2.0.1
+ENV CONTAINERPILOT_VER 2.1.0
 ENV CONTAINERPILOT file:///etc/containerpilot.json
 
-RUN export CONTAINERPILOT_CHECKSUM=a4dd6bc001c82210b5c33ec2aa82d7ce83245154 \
+RUN export CONTAINERPILOT_CHECKSUM=e7973bf036690b520b450c3a3e121fc7cd26f1a2 \
     && curl -Lso /tmp/containerpilot.tar.gz \
          "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
     && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
