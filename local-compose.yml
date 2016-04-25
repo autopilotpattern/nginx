@@ -13,17 +13,17 @@ nginx:
     ports:
         - 80:80
 
-app:
+example:
     extends:
         file: docker-compose.yml
-        service: app
-    mem_limit: 128m
+        service: example
+    build: example-backend/
     environment:
         - CONSUL=consul
     links:
         - consul:consul
     ports:
-        - 8000:8000
+        - 4000:4000
 
 consul:
     extends:

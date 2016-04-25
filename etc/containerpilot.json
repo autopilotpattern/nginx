@@ -1,6 +1,6 @@
 {
   "consul": "{{ .CONSUL }}:8500",
-  "onStart": "/usr/local/bin/reload.sh preStart",
+  "preStart": "/usr/local/bin/reload.sh preStart",
   "services": [
     {
       "name": "nginx",
