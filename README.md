@@ -39,5 +39,5 @@ open "http://$(triton ip nginx_consul_1):8500/ui"
 You can open the demo app that Nginx is proxying by opening a browser to the Nginx instance IP:
 
 ```bash
-open "http://$(triton ip nginx_nginx_1)"
+open "http://$(triton ip nginx_nginx_1)/example"
 ```
