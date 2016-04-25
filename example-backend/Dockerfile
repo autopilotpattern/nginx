@@ -11,21 +11,20 @@ RUN apk update && apk add \
 COPY package.json /opt/example/
 RUN cd /opt/example && npm install
 
-# get ContainerPilot release
-ENV CONTAINERPILOT_VERSION 2.0.1
-RUN export CP_SHA1=a4dd6bc001c82210b5c33ec2aa82d7ce83245154 \
+# add Containerpilot and its configuration
+ENV CONTAINERPILOT_VER 2.1.0
+ENV CONTAINERPILOT file:///etc/containerpilot.json
+COPY containerpilot.json /etc/containerpilot.json
+
+RUN export CONTAINERPILOT_CHECKSUM=e7973bf036690b520b450c3a3e121fc7cd26f1a2 \
     && curl -Lso /tmp/containerpilot.tar.gz \
-         "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VERSION}/containerpilot-${CONTAINERPILOT_VERSION}.tar.gz" \
-    && echo "${CP_SHA1}  /tmp/containerpilot.tar.gz" | sha1sum -c \
-    && tar zxf /tmp/containerpilot.tar.gz -C /bin \
+         "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
+    && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
+    && tar zxf /tmp/containerpilot.tar.gz -C /usr/local/bin \
     && rm /tmp/containerpilot.tar.gz
 
 # add our application
 COPY example.js /opt/example/
-
-# add ContainerPilot configuration
-COPY containerpilot.json /etc/containerpilot.json
-ENV CONTAINERPILOT=file:///etc/containerpilot.json
 
 EXPOSE 4000
 CMD [ "containerpilot", \
