@@ -1,0 +1,47 @@
+# Autopilot Nginx demo
+#
+# For most use cases, it's better to build a custom image using this Nginx base image
+# see https://github.com/autopilotpattern/wordpress for an example
+
+nginx:
+    image: autopilotpattern/nginx
+    restart: always
+    mem_limit: 512m
+    env_file: _env
+    environment:
+        - BACKEND=example
+    ports:
+        - 80
+    labels:
+        - triton.cns.services=nginx
+
+example:
+    image: autopilotpattern/nginx-example-app
+    mem_limit: 128m
+    env_file: _env
+    expose:
+        - 4000 # not strictly necessary because we don't link
+    restart: always
+    labels:
+        - triton.cns.services=example
+
+# Start with a single host which will bootstrap the cluster.
+# In production we'll want to use an HA cluster.
+consul:
+    image: progrium/consul:latest
+    restart: always
+    mem_limit: 128m
+    expose:
+      - 53
+      - 8300
+      - 8301
+      - 8302
+      - 8400
+      - 8500
+    ports:
+      - 8500
+    dns:
+       - 127.0.0.1
+    labels:
+        - triton.cns.services=consul
+    command: -server -bootstrap -ui-dir /ui

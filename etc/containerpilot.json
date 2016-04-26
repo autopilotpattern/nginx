@@ -1,6 +1,6 @@
 {
-  "consul": "consul:8500",
-  "onStart": "/usr/local/bin/reload.sh preStart",
+  "consul": "{{ .CONSUL }}:8500",
+  "preStart": "/usr/local/bin/reload.sh preStart",
   "services": [
     {
       "name": "nginx",
@@ -13,9 +13,28 @@
   ],
   "backends": [
     {
-      "name": "app",
+      "name": "{{ .BACKEND }}",
       "poll": 7,
       "onChange": "/usr/local/bin/reload.sh"
     }
-  ]
+  ],
+  "telemetry": {
+    "port": 9090,
+    "sensors": [
+      {
+        "name": "tb_nginx_connections_unhandled_total",
+        "help": "Number of accepted connnections that were not handled",
+        "type": "gauge",
+        "poll": 5,
+        "check": ["/usr/local/bin/sensor.sh", "unhandled"]
+      },
+      {
+        "name": "tb_nginx_connections_load",
+        "help": "Ratio of active connections (less waiting) to the maximum worker connections",
+        "type": "gauge",
+        "poll": 5,
+        "check": ["/usr/local/bin/sensor.sh", "connections_load"]
+      }
+    ]
+  }
 }

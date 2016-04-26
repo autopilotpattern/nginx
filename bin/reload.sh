@@ -6,32 +6,21 @@ CONSUL=${CONSUL:-consul}
 # Render Nginx configuration template using values from Consul,
 # but do not reload because Nginx has't started yet
 preStart() {
-    getConfig
     consul-template \
         -once \
+        -dedup \
         -consul ${CONSUL}:8500 \
-        -template "/tmp/nginx.ctmpl:/etc/nginx/nginx.conf"
+        -template "/etc/nginx/nginx.conf.ctmpl:/etc/nginx/nginx.conf"
 }
 
 # Render Nginx configuration template using values from Consul,
 # then gracefully reload Nginx
 onChange() {
-    getConfig
     consul-template \
         -once \
+        -dedup \
         -consul ${CONSUL}:8500 \
-        -template "/tmp/nginx.ctmpl:/etc/nginx/nginx.conf:nginx -s reload"
-}
-
-getConfig() {
-    if [ -z "${NGINX_CONF}" ]; then
-        # fetch latest Nginx configuration template from Consul k/v
-        curl -s --fail ${CONSUL}:8500/v1/kv/${SERVICE_NAME}/template?raw > /tmp/nginx.ctmpl
-    else
-        # dump the ${NGINX_CONF} environment variable as a file
-        # the quotes are important here to preserve newlines!
-        echo "${NGINX_CONF}" > /tmp/nginx.ctmpl
-    fi
+        -template "/etc/nginx/nginx.conf.ctmpl:/etc/nginx/nginx.conf:nginx -s reload"
 }
 
 help() {

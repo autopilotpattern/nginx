@@ -1,7 +1,7 @@
 Autopilot Pattern Nginx
 ==========
 
-*A re-usable Nginx image implemented according to the [Autopilot Pattern](http://autopilotpattern.io/) for automatic discovery and configuration.*
+*A re-usable Nginx base image implemented according to the [Autopilot Pattern](http://autopilotpattern.io/) for automatic discovery and configuration.*
 
 [![DockerPulls](https://img.shields.io/docker/pulls/autopilotpattern/nginx.svg)](https://registry.hub.docker.com/u/autopilotpattern/nginx/)
 [![DockerStars](https://img.shields.io/docker/stars/autopilotpattern/nginx.svg)](https://registry.hub.docker.com/u/autopilotpattern/nginx/)
@@ -10,36 +10,34 @@ Autopilot Pattern Nginx
 
 ### A reusable Nginx container image
 
-The goal of this project is to create an Nginx image that can be reused across environments without having to rebuild the entire image. Configuration of Nginx is entirely via ContainerPilot `onStart` or `onChange` handlers, which read the top-level Nginx configuration from either the `NGINX_CONF` environment variable or Consul.
+The goal of this project is to create an Nginx image that can be reused across environments without having to rebuild the entire image. Configuration of Nginx is entirely via ContainerPilot `preStart` or `onChange` handlers, which read the top-level Nginx configuration from either the `NGINX_CONF` environment variable or Consul.
 
+### Running in your own project
 
-### Running the example
+Consult https://github.com/autopilotpattern/wordpress for example usage.
 
-In the `examples` directory is a demonstration showing how ContainerPilot is used to knit together the components of a simple application. In this application, an Nginx node acts as a reverse proxy for any number of upstream application nodes. The application nodes register themselves with Consul as they come online, and the Nginx application is configured with an `onStart` and `onChange` handler that uses `consul-template` to write out a new Nginx configuration file and then gracefully reloads the configuration as needed.
-
-To try it yourself:
+### Hello world example
 
 1. [Get a Joyent account](https://my.joyent.com/landing/signup/) and [add your SSH key](https://docs.joyent.com/public-cloud/getting-started).
-1. Install the [Docker Toolbox](https://docs.docker.com/installation/mac/) (including `docker` and `docker-compose`) on your laptop or other environment, as well as the [Joyent CloudAPI CLI tools](https://apidocs.joyent.com/cloudapi/#getting-started) (including the `smartdc` and `json` tools)
-1. Have your CloudFlare API key handy.
-1. [Configure Docker and Docker Compose for use with Joyent](https://docs.joyent.com/public-cloud/api-access/docker):
+1. Install the [Docker Toolbox](https://docs.docker.com/installation/mac/) (including `docker` and `docker-compose`) on your laptop or other environment, as well as the [Joyent Triton CLI](https://www.joyent.com/blog/introducing-the-triton-command-line-tool) (`triton` replaces our old `sdc-*` CLI tools).
+1. [Configure Docker and Docker Compose for use with Joyent.](https://docs.joyent.com/public-cloud/api-access/docker)
+
+Check that everything is configured correctly by running `./setup.sh`. This will check that your environment is setup correctly and will create an `_env` file that includes injecting an environment variable for the Consul hostname into the Nginx and App containers so we can take advantage of [Triton Container Name Service (CNS)](https://www.joyent.com/blog/introducing-triton-container-name-service).
+
+Start everything:
 
 ```bash
-curl -O https://raw.githubusercontent.com/joyent/sdc-docker/master/tools/sdc-docker-setup.sh && chmod +x sdc-docker-setup.sh
-./sdc-docker-setup.sh -k us-east-1.api.joyent.com <ACCOUNT> ~/.ssh/<PRIVATE_KEY_FILE>
+docker-compose -p nginx up -d
 ```
 
-
-At this point you can run the example on Triton:
+The Nginx server will register with the Consul server named in the `_env` file. You can see its status there in the Consul web UI. On a Mac, you can open your browser to that with the following command:
 
 ```bash
-./start.sh
-
+open "http://$(triton ip nginx_consul_1):8500/ui"
 ```
 
-or in your local Docker environment:
+You can open the demo app that Nginx is proxying by opening a browser to the Nginx instance IP:
 
 ```bash
-./start.sh -f local-compose.yml
-
+open "http://$(triton ip nginx_nginx_1)/example"
 ```
