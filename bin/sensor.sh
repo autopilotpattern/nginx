@@ -9,9 +9,8 @@ help() {
 
 # Cummulative number of dropped connections
 unhandled() {
-    local scraped=$(curl -s --fail localhost/health)
-    local accepts=$(echo ${scraped} | awk 'FNR == 3 {print $1}')
-    local handled=$(echo ${scraped} | awk 'FNR == 3 {print $2}')
+    local accepts=$(curl -s --fail localhost/health | awk 'FNR == 3 {print $1}')
+    local handled=$(curl -s --fail localhost/health | awk 'FNR == 3 {print $2}')
     echo $(expr ${accepts} - ${handled})
 }
 
