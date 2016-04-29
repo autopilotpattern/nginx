@@ -12,6 +12,7 @@ nginx:
         - BACKEND=example
     ports:
         - 80
+        - 9090 # so we can see telemetry
     labels:
         - triton.cns.services=nginx
 

@@ -10,6 +10,7 @@ nginx:
         - consul:consul
     ports:
         - 80:80
+        - 9090:9090 # telemetry endpoint
 
 example:
     extends:
