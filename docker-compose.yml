@@ -10,6 +10,7 @@ nginx:
     env_file: _env
     environment:
         - BACKEND=example
+        - CONSUL_AGENT=1
     ports:
         - 80
         - 9090 # so we can see telemetry
@@ -20,6 +21,8 @@ example:
     image: autopilotpattern/nginx-example-app
     mem_limit: 128m
     env_file: _env
+    environment:
+        - CONSUL_AGENT=1
     expose:
         - 4000 # not strictly necessary because we don't link
     restart: always

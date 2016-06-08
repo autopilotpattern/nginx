@@ -1,11 +1,11 @@
 {
-  "consul": "{{ .CONSUL }}:8500",
+  "consul": "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ .CONSUL }}{{ end }}:8500",
   "preStart": "/usr/local/bin/reload.sh preStart",
+  "logging": {"level": "DEBUG"},
   "services": [
     {
       "name": "nginx",
       "port": 80,
-      "publicIp": true,
       "health": "/usr/bin/curl --fail -s http://localhost/health",
       "poll": 10,
       "ttl": 25
@@ -18,6 +18,17 @@
       "onChange": "/usr/local/bin/reload.sh"
     }
   ],
+  "coprocesses": [{{ if .CONSUL_AGENT }}
+    {
+      "command": ["/usr/local/bin/consul", "agent",
+                  "-data-dir=/data",
+                  "-config-dir=/config",
+                  "-rejoin",
+                  "-retry-join", "{{ .CONSUL }}",
+                  "-retry-max", "10",
+                  "-retry-interval", "10s"],
+      "restarts": "unlimited"
+    }{{ end }}],
   "telemetry": {
     "port": 9090,
     "sensors": [

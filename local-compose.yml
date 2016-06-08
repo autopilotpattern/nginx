@@ -6,6 +6,7 @@ nginx:
     mem_limit: 128g
     environment:
         - CONSUL=consul
+        - CONSUL_AGENT=1
     links:
         - consul:consul
     ports:
@@ -19,6 +20,7 @@ example:
     build: example-backend/
     environment:
         - CONSUL=consul
+        - CONSUL_AGENT=1
     links:
         - consul:consul
     ports:
