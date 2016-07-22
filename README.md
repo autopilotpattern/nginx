@@ -41,3 +41,12 @@ You can open the demo app that Nginx is proxying by opening a browser to the Ngi
 ```bash
 open "http://$(triton ip nginx_nginx_1)/example"
 ```
+
+### Building
+
+This image implements [microbadger.com](https://microbadger.com/#/labels) label schema, but those labels require additional build args:
+
+```
+docker build --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+               --build-arg VCS_REF=`git rev-parse --short HEAD` .
+```
