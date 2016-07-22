@@ -1,18 +1,6 @@
 # A minimal Nginx container including ContainerPilot and a simple virtualhost config
 FROM nginx:latest
 
-# Build-time metadata as defined at http://label-schema.org
-# with added usage described in https://microbadger.com/#/labels
-ARG BUILD_DATE
-ARG VCS_REF
-LABEL org.label-schema.build-date=$BUILD_DATE \
-    org.label-schema.docker.dockerfile="/Dockerfile" \
-    org.label-schema.name="Autopilot Pattern Nginx" \
-    org.label-schema.url="https://github.com/autopilotpattern/nginx" \
-    org.label-schema.vcs-ref=$VCS_REF \
-    org.label-schema.vcs-type="Git" \
-    org.label-schema.vcs-url="https://github.com/autopilotpattern/nginx"
-
 # Add some stuff via apt-get
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

@@ -5,8 +5,6 @@ Autopilot Pattern Nginx
 
 [![DockerPulls](https://img.shields.io/docker/pulls/autopilotpattern/nginx.svg)](https://registry.hub.docker.com/u/autopilotpattern/nginx/)
 [![DockerStars](https://img.shields.io/docker/stars/autopilotpattern/nginx.svg)](https://registry.hub.docker.com/u/autopilotpattern/nginx/)
-[![MicroBadger version](https://images.microbadger.com/badges/version/autopilotpattern/nginx.svg)](http://microbadger.com/#/images/autopilotpattern/nginx)
-[![MicroBadger commit](https://images.microbadger.com/badges/commit/autopilotpattern/nginx.svg)](http://microbadger.com/#/images/autopilotpattern/nginx)
 
 ### A reusable Nginx container image
 
@@ -40,13 +38,4 @@ You can open the demo app that Nginx is proxying by opening a browser to the Ngi
 
 ```bash
 open "http://$(triton ip nginx_nginx_1)/example"
-```
-
-### Building
-
-This image implements [microbadger.com](https://microbadger.com/#/labels) label schema, but those labels require additional build args:
-
-```
-docker build --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-               --build-arg VCS_REF=`git rev-parse --short HEAD` .
 ```
