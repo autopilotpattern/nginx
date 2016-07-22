@@ -5,8 +5,8 @@ Autopilot Pattern Nginx
 
 [![DockerPulls](https://img.shields.io/docker/pulls/autopilotpattern/nginx.svg)](https://registry.hub.docker.com/u/autopilotpattern/nginx/)
 [![DockerStars](https://img.shields.io/docker/stars/autopilotpattern/nginx.svg)](https://registry.hub.docker.com/u/autopilotpattern/nginx/)
-[![ImageLayers](https://badge.imagelayers.io/autopilotpattern/nginx:latest.svg)](https://imagelayers.io/?images=autopilotpattern/nginx:latest)
-[![Join the chat at https://gitter.im/autopilotpattern/general](https://badges.gitter.im/autopilotpattern/general.svg)](https://gitter.im/autopilotpattern/general)
+[![MicroBadger version](https://images.microbadger.com/badges/version/autopilotpattern/nginx.svg)](http://microbadger.com/#/images/autopilotpattern/nginx)
+[![MicroBadger commit](https://images.microbadger.com/badges/commit/autopilotpattern/nginx.svg)](http://microbadger.com/#/images/autopilotpattern/nginx)
 
 ### A reusable Nginx container image
 
