@@ -21,8 +21,8 @@
   "coprocesses": [{{ if .CONSUL_AGENT }}
     {
       "command": ["/usr/local/bin/consul", "agent",
-                  "-data-dir=/data",
-                  "-config-dir=/config",
+                  "-data-dir=/var/lib/consul",
+                  "-config-dir=/etc/consul",
                   "-rejoin",
                   "-retry-join", "{{ .CONSUL }}",
                   "-retry-max", "10",
