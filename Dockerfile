@@ -1,6 +1,18 @@
 # A minimal Nginx container including ContainerPilot and a simple virtualhost config
 FROM nginx:latest
 
+# Build-time metadata as defined at http://label-schema.org
+# with added usage described in https://microbadger.com/#/labels
+ARG BUILD_DATE
+ARG VCS_REF
+LABEL org.label-schema.build-date=$BUILD_DATE \
+    org.label-schema.docker.dockerfile="/Dockerfile" \
+    org.label-schema.name="Autopilot Pattern Nginx" \
+    org.label-schema.url="https://github.com/autopilotpattern/nginx" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-type="Git" \
+    org.label-schema.vcs-url="https://github.com/autopilotpattern/nginx"
+
 # Add some stuff via apt-get
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -17,13 +29,12 @@ RUN export CHECKSUM=abdf0e1856292468e2c9971420d73b805e93888e006c76324ae39416edcf
     && rm /tmp/consul.zip \
     && mkdir /config
 
-# Add Consul template
+# Install Consul template
 # Releases at https://releases.hashicorp.com/consul-template/
-ENV CONSUL_TEMPLATE_VERSION 0.14.0
-ENV CONSUL_TEMPLATE_SHA1 7c70ea5f230a70c809333e75fdcff2f6f1e838f29cfb872e1420a63cdf7f3a78
-
-RUN curl --retry 7 -Lso /tmp/consul-template.zip "https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip" \
-    && echo "${CONSUL_TEMPLATE_SHA1}  /tmp/consul-template.zip" | sha256sum -c \
+RUN export CONSUL_TEMPLATE_VERSION=0.14.0 \
+    && export CONSUL_TEMPLATE_CHECKSUM=7c70ea5f230a70c809333e75fdcff2f6f1e838f29cfb872e1420a63cdf7f3a78 \
+    && curl --retry 7 --fail -Lso /tmp/consul-template.zip "https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip" \
+    && echo "${CONSUL_TEMPLATE_CHECKSUM}  /tmp/consul-template.zip" | sha256sum -c \
     && unzip /tmp/consul-template.zip -d /usr/local/bin \
     && rm /tmp/consul-template.zip
 
