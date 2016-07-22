@@ -33,14 +33,14 @@
     "port": 9090,
     "sensors": [
       {
-        "name": "tb_nginx_connections_unhandled_total",
+        "name": "nginx_connections_unhandled_total",
         "help": "Number of accepted connnections that were not handled",
         "type": "gauge",
         "poll": 5,
         "check": ["/usr/local/bin/sensor.sh", "unhandled"]
       },
       {
-        "name": "tb_nginx_connections_load",
+        "name": "nginx_connections_load",
         "help": "Ratio of active connections (less waiting) to the maximum worker connections",
         "type": "gauge",
         "poll": 5,
