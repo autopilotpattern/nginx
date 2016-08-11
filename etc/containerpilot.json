@@ -6,7 +6,7 @@
     {
       "name": "nginx",
       "port": 80,
-      "health": "/usr/bin/curl --fail -s http://localhost/nginx-health",
+      "health": "/usr/bin/curl --fail --silent --show-error --output /dev/null http://localhost/nginx-health",
       "poll": 10,
       "ttl": 25
     }
