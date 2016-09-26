@@ -8,7 +8,16 @@
       "port": 80,
       "health": "/usr/bin/curl --fail --silent --show-error --output /dev/null http://localhost/nginx-health",
       "poll": 10,
-      "ttl": 25
+      "ttl": 25,
+      "interfaces": ["eth0"]
+    },
+    {
+      "name": "nginx-public",
+      "port": 80,
+      "health": "/usr/bin/curl --fail --silent --show-error --output /dev/null http://localhost/nginx-health",
+      "poll": 10,
+      "ttl": 25,
+      "interfaces": ["eth1", "eth0"]
     }
   ],
   "backends": [
