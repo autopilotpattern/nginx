@@ -46,6 +46,8 @@ RUN export CONTAINERPILOT_CHECKSUM=ec9dbedaca9f4a7a50762f50768cbc42879c7208 \
 # Add our configuration files and scripts
 COPY etc /etc
 COPY bin /usr/local/bin
+RUN mkdir -p /var/www/ssl
+RUN mkdir -p /var/www/acme/challenge
 
 CMD [ "/usr/local/bin/containerpilot", \
     "nginx", \
