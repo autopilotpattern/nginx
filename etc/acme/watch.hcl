@@ -18,5 +18,5 @@ template {
 template {
     source = "/etc/acme/templates/challenge-token.ctmpl"
     destination = "/var/www/acme/challenge-token"
-    command = "/usr/local/bin/generate-token /var/www/acme/challenge-token /var/www/acme/challenge/"
+    command = "/usr/local/bin/generate-token /var/www/acme/challenge-token /var/www/acme/challenge"
 }
