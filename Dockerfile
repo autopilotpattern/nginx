@@ -43,6 +43,13 @@ RUN export CONTAINERPILOT_CHECKSUM=ec9dbedaca9f4a7a50762f50768cbc42879c7208 \
     && tar zxf /tmp/containerpilot.tar.gz -C /usr/local/bin \
     && rm /tmp/containerpilot.tar.gz
 
+# Add Dehydrated
+RUN export DEHYDRATED_VERSION=v0.3.1 \
+    && curl --retry 8 --fail -Lso /tmp/dehydrated.zip "https://github.com/lukas2511/dehydrated/archive/${DEHYDRATED_VERSION}.tar.gz" \
+    && tar xzf /tmp/dehydrated.tar.gz -C /tmp
+    && mv /tmp/dehydrated-0.3.1/dehydrated /usr/local/bin \
+    && rm -rf /tmp/dehydrated-0.3.1
+
 # Add our configuration files and scripts
 COPY etc /etc
 COPY bin /usr/local/bin
