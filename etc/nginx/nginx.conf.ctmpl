@@ -30,6 +30,7 @@ http {
     #gzip  on;
 
     {{ $backend := env "BACKEND" }}
+    {{ $acme := env "ENABLE_ACME" }}
     {{ if service $backend }}
     upstream {{ $backend }} {
         # write the address:port pairs for each healthy backend instance
@@ -48,6 +49,12 @@ http {
             allow 127.0.0.1;
             deny all;
         }
+
+        {{ if $acme }}
+        location /.well-known/acme-challenge {
+            alias /var/www/acme/challenge;
+        }{{ end }}
+
         {{ if service $backend }}
         location = /{{ $backend }} {
             return 301 /{{ $backend }}/;
