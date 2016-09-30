@@ -11,6 +11,7 @@ nginx:
     environment:
         - BACKEND=example
         - CONSUL_AGENT=1
+        - ACME_ENV=staging
     ports:
         - 80
         - 9090 # so we can see telemetry

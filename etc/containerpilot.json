@@ -85,7 +85,7 @@
                   "--cron",
                   "--domain", "{{ .ACME_DOMAIN }}",
                   "--hook", "/etc/dehydrated/hook.sh",
-                  "--config", "/etc/dehydrated/config"],
+                  "--config", "/etc/dehydrated/config.{{ .ACME_ENV }}"],
       "frequency": "12h",
       "timeout": "10m"
     },
@@ -99,7 +99,7 @@
                   "--cleanup",
                   "--domain", "{{ .ACME_DOMAIN }}",
                   "--hook", "/etc/dehydrated/hook.sh",
-                  "--config", "/etc/dehydrated/config"],
+                  "--config", "/etc/dehydrated/config.{{ .ACME_ENV }}"],
       "frequency": "24h",
       "timeout": "10m"
     }{{ end }}

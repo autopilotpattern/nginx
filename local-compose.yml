@@ -7,6 +7,7 @@ nginx:
     environment:
         - CONSUL=consul
         - CONSUL_AGENT=1
+        - ACME_ENV=staging
     links:
         - consul:consul
     ports:
