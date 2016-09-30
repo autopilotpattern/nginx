@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-DOMAIN=$1
-IN="/var/ssl/acme"
-OUT="/var/ssl/acme/challenge"
-FILENAME="$(sed '1q;d' ${IN}/${DOMAIN}-token)"
-VALUE="$(sed '2q;d' ${IN}/${DOMAIN}-token)"
-LAST_FILENAME="$(sed '3q;d' ${IN}/${DOMAIN}-token)"
+
+IN=$1
+OUT=$2
+FILENAME="$(sed '1q;d' ${IN})"
+VALUE="$(sed '2q;d' ${IN})"
+LAST_FILENAME="$(sed '3q;d' ${IN})"
 
 if [ "${FILENAME}" ]; then
     echo "${VALUE}" > ${OUT}/${FILENAME}
@@ -13,3 +13,5 @@ fi
 if [ "${LAST_FILENAME}" ]; then
     rm -f ${OUT}/${LAST_FILENAME}
 fi
+
+rm ${IN}
