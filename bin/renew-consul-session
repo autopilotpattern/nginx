@@ -22,9 +22,9 @@ function renewSession () {
     printf "Renewing Consul session ${SID}... "
     local STATUS=$(curl -s -o /dev/null -X PUT -w '%{http_code}' http://$CONSUL_HOST:8500/v1/session/renew/${SID})
     if [ "${STATUS}" = "200" ]; then
-        echo "complete."
+        echo "complete"
     else
-        echo "failed."
+        echo "failed"
         createSession
     fi
 }
@@ -33,7 +33,7 @@ function createSession () {
     printf "Creating Consul session... "
     local SID=$(curl -sX PUT -d '{"LockDelay":"0s","Name":"acme-lock","Behavior":"release","TTL":"600s"}' http://127.0.0.1:8500/v1/session/create | awk -F  '"' '{print $4}')
     rc=$?; if [[ $rc != 0 ]]; then
-        echo "failed."
+        echo "failed"
     else
         echo $SID
         echo $SID > $SESSION_FILE

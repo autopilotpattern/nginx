@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+CONSUL_HOST_DEFAULT="localhost"
+if [ "${CONSUL_AGENT}" = "" -a "${CONSUL}" != "" ]; then
+    CONSUL_HOST_DEFAULT=${CONSUL}
+fi
+CONSUL_HOST=${CONSUL_HOST:-$CONSUL_HOST_DEFAULT}
+CONSUL_ROOT="http://${CONSUL_HOST}:8500/v1/kv/nginx"
+
+SESSION_DIR_DEFAULT="/var/consul"
+SESSION_DIR=${SESSION_DIR:-$SESSION_DIR_DEFAULT}
+SESSION_FILE=${SESSION_DIR}/session
+
+SID=$(cat $SESSION_FILE)
+
+STATUS=$(curl -sX PUT -d "$(hostname)" -o /dev/null -w '%{http_code}' "${CONSUL_ROOT}/acme/leader?acquire=${SID}")
+if [ "${STATUS}" = "200" ]; then
+    echo "ACME leader claimed"
+else
+    echo "Failed to claim ACME leader"
+    exit 1
+fi
