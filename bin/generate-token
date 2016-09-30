@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+DOMAIN=$1
+IN="/var/ssl/acme"
+OUT="/var/ssl/acme/challenge"
+FILENAME="$(sed '1q;d' ${IN}/${DOMAIN}-token)"
+VALUE="$(sed '2q;d' ${IN}/${DOMAIN}-token)"
+LAST_FILENAME="$(sed '3q;d' ${IN}/${DOMAIN}-token)"
+
+if [ "${FILENAME}" ]; then
+    echo "${VALUE}" > ${OUT}/${FILENAME}
+fi
+
+if [ "${LAST_FILENAME}" ]; then
+    rm -f ${OUT}/${LAST_FILENAME}
+fi
