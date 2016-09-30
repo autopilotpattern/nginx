@@ -37,6 +37,13 @@
                   "-retry-max", "10",
                   "-retry-interval", "10s"],
       "restarts": "unlimited"
+    }{{ end }}
+    {{ if .CONSUL_AGENT and .ACME_DOMAIN }},{{ end }}
+    {{ if .ACME_DOMAIN }}
+    {
+        "command": ["/usr/local/bin/consul-template",
+                    "-config", "/etc/acme/watch.hcl",
+                    "-consul", "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ .CONSUL }}{{ end }}:8500"]
     }{{ end }}],
   "telemetry": {
     "port": 9090,
@@ -56,5 +63,45 @@
         "check": ["/usr/local/bin/sensor.sh", "connections_load"]
       }
     ]
-  }
+  },
+  "tasks": [{{ if .ACME_DOMAIN }}
+    {
+      "name": "renew-session-and-leader",
+      "command": ["/usr/local/bin/renew-consul-session",
+                  "&&",
+                  "/usr/local/bin/acquire-acme-leader",
+                  "||",
+                  "exit 0"],
+      "frequency": "150s",
+      "timeout": "10s"
+    },
+    {
+      "name": "renew-leader-and-certs",
+      "command": ["/usr/local/bin/acquire-acme-leader",
+                  "&&",
+                  "cd /var/www/acme",
+                  "&&",
+                  "/usr/local/bin/dehydrated",
+                  "--cron",
+                  "--domain", "{{ .ACME_DOMAIN }}",
+                  "--hook", "/etc/dehydrated/hook.sh",
+                  "--config", "/etc/dehydrated/config"],
+      "frequency": "12h",
+      "timeout": "10m"
+    },
+    {
+      "name": "clean-unused-certs",
+      "command": ["/usr/local/bin/acquire-acme-leader",
+                  "&&",
+                  "cd /var/www/acme",
+                  "&&",
+                  "/usr/local/bin/dehydrated",
+                  "--cleanup",
+                  "--domain", "{{ .ACME_DOMAIN }}",
+                  "--hook", "/etc/dehydrated/hook.sh",
+                  "--config", "/etc/dehydrated/config"],
+      "frequency": "24h",
+      "timeout": "10m"
+    }{{ end }}
+  ]
 }
