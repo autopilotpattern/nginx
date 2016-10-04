@@ -38,7 +38,7 @@
                   "-retry-interval", "10s"],
       "restarts": "unlimited"
     }{{ end }}
-    {{ if .CONSUL_AGENT and .ACME_DOMAIN }},{{ end }}
+    {{ if and .CONSUL_AGENT .ACME_DOMAIN }},{{ end }}
     {{ if .ACME_DOMAIN }}
     {
         "command": ["/usr/local/bin/consul-template",
@@ -76,7 +76,7 @@
       "command": [ "/usr/local/bin/acme", "renew-certs",
                   "--domain", "{{ .ACME_DOMAIN }}",
                   "--hook", "/etc/acme/dehydrated/hook.sh",
-                  "--config", "/etc/acme/dehydrated/config.{{ if .ACME_ENV }}{{ .ACME_ENV }}{{ else }}{{ \"staging\" }}{{ end }}"],
+                  "--config", "/etc/acme/dehydrated/config.{{ if .ACME_ENV }}{{ .ACME_ENV }}{{ else }}{{ `"staging"` }}{{ end }}"],
       "frequency": "12h",
       "timeout": "10m"
     },
@@ -85,7 +85,7 @@
       "command": ["/usr/local/bin/acme", "clean-certs",
                   "--domain", "{{ .ACME_DOMAIN }}",
                   "--hook", "/etc/acme/dehydrated/hook.sh",
-                  "--config", "/etc/acme/dehydrated/config.{{ if .ACME_ENV }}{{ .ACME_ENV }}{{ else }}{{ \"staging\" }}{{ end }}"],
+                  "--config", "/etc/acme/dehydrated/config.{{ if .ACME_ENV }}{{ .ACME_ENV }}{{ else }}{{ `"staging"` }}{{ end }}"],
       "frequency": "24h",
       "timeout": "10m"
     }{{ end }}
