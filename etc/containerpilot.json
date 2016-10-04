@@ -18,7 +18,15 @@
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth1", "eth0"]
-    }
+    }{{ if .ACME_DOMAIN }},
+    {
+      "name": "nginx-public-ssl",
+      "port": 443,
+      "health": "/usr/local/bin/acme init && /usr/bin/curl --insecure --fail --silent --show-error --output /dev/null https://localhost/nginx-health",
+      "poll": 10,
+      "ttl": 25,
+      "interfaces": ["eth1", "eth0"]
+    }{{ end }}
   ],
   "backends": [
     {
@@ -69,7 +77,7 @@
     {
       "name": "acme-checkin",
       "command": [ "/usr/local/bin/acme", "checkin" ],
-      "frequency": "150s",
+      "frequency": "5m",
       "timeout": "10s"
     },
     {
