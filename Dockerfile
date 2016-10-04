@@ -45,10 +45,15 @@ RUN export CONTAINERPILOT_CHECKSUM=ec9dbedaca9f4a7a50762f50768cbc42879c7208 \
 
 # Add Dehydrated
 RUN export DEHYDRATED_VERSION=v0.3.1 \
-    && curl --retry 8 --fail -Lso /tmp/dehydrated.zip "https://github.com/lukas2511/dehydrated/archive/${DEHYDRATED_VERSION}.tar.gz" \
-    && tar xzf /tmp/dehydrated.tar.gz -C /tmp
+    && curl --retry 8 --fail -Lso /tmp/dehydrated.tar.gz "https://github.com/lukas2511/dehydrated/archive/${DEHYDRATED_VERSION}.tar.gz" \
+    && tar xzf /tmp/dehydrated.tar.gz -C /tmp \
     && mv /tmp/dehydrated-0.3.1/dehydrated /usr/local/bin \
     && rm -rf /tmp/dehydrated-0.3.1
+
+# Add jq
+RUN export JQ_VERSION=1.5
+    curl --retry 8 --fail -Lso /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" \
+    && chmod a+x /usr/local/bin/jq
 
 # Add our configuration files and scripts
 COPY etc /etc
