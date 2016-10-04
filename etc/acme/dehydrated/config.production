@@ -1,1 +1,2 @@
 CA="https://acme-v01.api.letsencrypt.org/directory"
+WELLKNOWN="/var/www/acme/challenge"
