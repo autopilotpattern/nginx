@@ -16,6 +16,10 @@ SESSION_DIR_DEFAULT="/var/consul"
 SESSION_DIR=${SESSION_DIR:-$SESSION_DIR_DEFAULT}
 SESSION_FILE=${SESSION_DIR}/session
 
+CERT_DIR="/var/www/ssl"
+
+ACME_ENV=${ACME_ENV:-staging}
+
 function getConsulSession () {
     if [ -f $SESSION_FILE ]; then 
         SID=$(cat ${SESSION_DIR}/session)
@@ -113,23 +117,33 @@ case "$1" in
         renewConsulSession &&
         ( acquireLeader || exit 0 )
         ;;
+    init)
+        if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem -a "$(cat ${CERT_DIR}/fullchain.pem)" != "" -a "$(cat ${CERT_DIR}/privkey.pem)" != "" ]; then
+            exit 0
+        fi
+        shift
+        renewConsulSession &&
+        acquireLeader &&
+        ${SCRIPTPATH}/dehydrated --cron --domain ${ACME_DOMAIN} --hook /etc/acme/dehydrated/hook.sh --config /etc/acme/dehydrated/config.${ACME_ENV} &&
+        ${SCRIPTPATH}/reload.sh onChange
+        ;;
     renew-certs)
         shift
         renewConsulSession &&
         acquireLeader &&
-        ${SCRIPTPATH}/dehydrated --cron "$@"
+        ${SCRIPTPATH}/dehydrated --cron --domain ${ACME_DOMAIN} --hook /etc/acme/dehydrated/hook.sh --config /etc/acme/dehydrated/config.${ACME_ENV}
         ;;
     clean-certs)
         shift
         renewConsulSession &&
         acquireLeader &&
-        ${SCRIPTPATH}/dehydrated --cleanup "$@"
+        ${SCRIPTPATH}/dehydrated --cleanup --domain ${ACME_DOMAIN} --hook /etc/acme/dehydrated/hook.sh --config /etc/acme/dehydrated/config.${ACME_ENV}
         ;;
     generate-challenge-token)
         generateChallengeToken $2 $3
         ;;
     *)
-        echo $"Usage: $0 [ {get,create,renew}-consul-session | acquire-leader | checkin | renew-certs | clean-certs | generate-challenge-token ]"
+        echo $"Usage: $0 [ {get,create,renew}-consul-session | acquire-leader | init | checkin | renew-certs | clean-certs | generate-challenge-token ]"
         exit 1
         ;;
 esac
