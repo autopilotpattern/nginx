@@ -82,19 +82,13 @@
     },
     {
       "name": "acme-renew-certs",
-      "command": [ "/usr/local/bin/acme", "renew-certs",
-                   "--domain", "{{ .ACME_DOMAIN }}",
-                   "--hook", "/etc/acme/dehydrated/hook.sh",
-                   "--config", "/etc/acme/dehydrated/config.{{ if .ACME_ENV }}{{ .ACME_ENV }}{{ else }}{{ `"staging"` }}{{ end }}"],
+      "command": [ "/usr/local/bin/acme", "renew-certs" ],
       "frequency": "12h",
       "timeout": "10m"
     },
     {
       "name": "clean-unused-certs",
-      "command": ["/usr/local/bin/acme", "clean-certs",
-                  "--domain", "{{ .ACME_DOMAIN }}",
-                  "--hook", "/etc/acme/dehydrated/hook.sh",
-                  "--config", "/etc/acme/dehydrated/config.{{ if .ACME_ENV }}{{ .ACME_ENV }}{{ else }}{{ `"staging"` }}{{ end }}"],
+      "command": ["/usr/local/bin/acme", "clean-certs" ],
       "frequency": "24h",
       "timeout": "10m"
     }{{ end }}
