@@ -1,1 +1,1 @@
-{{key "nginx/acme/fullchain"}}
+{{if key "nginx/acme/fullchain"}}{{key "nginx/acme/fullchain"}}{{end}}

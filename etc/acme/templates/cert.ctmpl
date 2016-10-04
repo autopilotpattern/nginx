@@ -1,1 +1,1 @@
-{{key "nginx/acme/cert"}}
+{{if key "nginx/acme/cert"}}{{key "nginx/acme/cert"}}{{end}}
