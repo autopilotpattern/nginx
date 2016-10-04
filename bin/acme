@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+
+pushd `dirname $0` > /dev/null
+SCRIPTPATH=`pwd -P`
+popd > /dev/null
+
+CONSUL_HOST_DEFAULT="localhost"
+if [ "${CONSUL_AGENT}" = "" -a "${CONSUL}" != "" ]; then
+    CONSUL_HOST_DEFAULT=${CONSUL}
+fi
+CONSUL_HOST=${CONSUL_HOST:-$CONSUL_HOST_DEFAULT}
+CONSUL_ROOT="http://${CONSUL_HOST}:8500/v1"
+CONSUL_KEY_ROOT="${CONSUL_ROOT}/kv/nginx"
+
+SESSION_DIR_DEFAULT="/var/consul"
+SESSION_DIR=${SESSION_DIR:-$SESSION_DIR_DEFAULT}
+SESSION_FILE=${SESSION_DIR}/session
+
+function getConsulSession () {
+    if [ -f $SESSION_FILE ]; then 
+        SID=$(cat ${SESSION_DIR}/session)
+        local STATUS=$(curl -s ${CONSUL_ROOT}/session/info/${SID})
+        if [ "${STATUS}" != "[]" ]; then
+            echo $SID
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 1
+    fi
+}
+
+function renewConsulSession () {
+    local SID="$(getConsulSession)"
+    rc=$?
+    if [ $rc -ne 0 ]; then 
+        createConsulSession
+        return $?
+    else
+        printf "Renewing Consul session ${SID}... "
+        local STATUS=$(curl -s -o /dev/null -X PUT -w '%{http_code}' ${CONSUL_ROOT}/session/renew/${SID})
+        if [ "${STATUS}" = "200" ]; then
+            echo "complete"
+            return 0
+        else
+            echo "failed"
+            createConsulSession
+            return $?
+        fi
+    fi
+}
+
+function createConsulSession () {
+    printf "Creating Consul session... "
+    local SID=$(curl -sX PUT -d '{"LockDelay":"0s","Name":"acme-lock","Behavior":"release","TTL":"600s"}' ${CONSUL_ROOT}/session/create | awk -F  '"' '{print $4}')
+    rc=$?
+    if [[ $rc -ne 0 ]]; then
+        echo "failed"
+        return 1
+    else
+        echo $SID
+        echo $SID > $SESSION_FILE
+        return 0
+    fi
+}
+
+function acquireLeader () {
+    local SID="$(getConsulSession)"
+    STATUS=$(curl -sX PUT -d "$(hostname)" "${CONSUL_KEY_ROOT}/acme/leader?acquire=${SID}")
+
+    if [ "${STATUS}" = "true" ]; then
+        echo "ACME leader claimed"
+        return 0
+    else
+        echo "Failed to claim ACME leader"
+        return 1
+    fi
+}
+
+function generateChallengeToken () {
+    IN=$1
+    OUT=$2
+    FILENAME="$(sed '1q;d' ${IN})"
+    VALUE="$(sed '2q;d' ${IN})"
+    LAST_FILENAME="$(sed '3q;d' ${IN})"
+
+    if [ "${FILENAME}" ]; then
+        echo "${VALUE}" > ${OUT}/${FILENAME}
+    fi
+
+    if [ "${LAST_FILENAME}" ]; then
+        rm -f ${OUT}/${LAST_FILENAME}
+    fi
+
+    rm ${IN}
+}
+
+case "$1" in
+    get-consul-session)
+        getConsulSession
+        ;;
+    create-consul-session)
+        createConsulSession
+        ;;
+    renew-consul-session)
+        renewConsulSession
+        ;;
+    acquire-leader)
+        acquireLeader
+        ;;
+    checkin)
+        renewConsulSession &&
+        ( acquireLeader || exit 0 )
+        ;;
+    renew-certs)
+        shift
+        renewConsulSession &&
+        acquireLeader &&
+        ${SCRIPTPATH}/dehydrated --cron "$@"
+        ;;
+    clean-certs)
+        shift
+        renewConsulSession &&
+        acquireLeader &&
+        ${SCRIPTPATH}/dehydrated --cleanup "$@"
+        ;;
+    generate-challenge-token)
+        generateChallengeToken $2 $3
+        ;;
+    *)
+        echo $"Usage: $0 [ {get,create,renew}-consul-session | acquire-leader | checkin | renew-certs | clean-certs | generate-challenge-token ]"
+        exit 1
+        ;;
+esac
