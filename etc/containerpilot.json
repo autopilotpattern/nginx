@@ -41,9 +41,10 @@
     {{ if and .CONSUL_AGENT .ACME_DOMAIN }},{{ end }}
     {{ if .ACME_DOMAIN }}
     {
-        "command": ["/usr/local/bin/consul-template",
-                    "-config", "/etc/acme/watch.hcl",
-                    "-consul", "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ .CONSUL }}{{ end }}:8500"]
+      "command": ["/usr/local/bin/consul-template",
+                  "-config", "/etc/acme/watch.hcl",
+                  "-consul", "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ .CONSUL }}{{ end }}:8500"],
+      "restarts": "unlimited"
     }{{ end }}],
   "telemetry": {
     "port": 9090,
@@ -74,9 +75,9 @@
     {
       "name": "acme-renew-certs",
       "command": [ "/usr/local/bin/acme", "renew-certs",
-                  "--domain", "{{ .ACME_DOMAIN }}",
-                  "--hook", "/etc/acme/dehydrated/hook.sh",
-                  "--config", "/etc/acme/dehydrated/config.{{ if .ACME_ENV }}{{ .ACME_ENV }}{{ else }}{{ `"staging"` }}{{ end }}"],
+                   "--domain", "{{ .ACME_DOMAIN }}",
+                   "--hook", "/etc/acme/dehydrated/hook.sh",
+                   "--config", "/etc/acme/dehydrated/config.{{ if .ACME_ENV }}{{ .ACME_ENV }}{{ else }}{{ `"staging"` }}{{ end }}"],
       "frequency": "12h",
       "timeout": "10m"
     },
