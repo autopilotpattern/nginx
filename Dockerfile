@@ -51,8 +51,8 @@ RUN export DEHYDRATED_VERSION=v0.3.1 \
     && rm -rf /tmp/dehydrated-0.3.1
 
 # Add jq
-RUN export JQ_VERSION=1.5
-    curl --retry 8 --fail -Lso /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" \
+RUN export JQ_VERSION=1.5 \
+    && curl --retry 8 --fail -Lso /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" \
     && chmod a+x /usr/local/bin/jq
 
 # Add our configuration files and scripts
