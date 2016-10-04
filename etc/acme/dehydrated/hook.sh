@@ -23,17 +23,15 @@ function deploy_challenge {
     local RETRIES=0
     local MATCHING=0
     printf " + Waiting for challenge to be deployed..."
-    while [ $RETRIES -lt $TOKEN_DEPLOY_RETRY_LIMIT ]; do
+    while [ $RETRIES -lt $TOKEN_DEPLOY_RETRY_LIMIT -a $MATCHING -lt $NGINX_INSTANCE_COUNT ]; do
+        echo "MATCHING: $MATCHING, COUNT: $NGINX_INSTANCE_COUNT"
+        MATCHING=0
         for NGINX_INSTANCE_HOST in $NGINX_INSTANCES; do
-            if [ "$(curl -s --header \"HOST: ${DOMAIN}\" http://${NGINX_INSTANCE_HOST}${CHALLENGE_PATH}/${TOKEN_FILENAME})" != "${TOKEN_VALUE}" ]; then
+            if [ "$(curl -s --header \"HOST: ${DOMAIN}\" http://${NGINX_INSTANCE_HOST}${CHALLENGE_PATH}/${TOKEN_FILENAME})" = "${TOKEN_VALUE}" ]; then
                 MATCHING=$((MATCHING+1))
             fi
         done
-        if [ $MATCHING -eq $NGINX_INSTANCE_COUNT ]; then
-            break
-        fi
         RETRIES=$((RETRIES+1))
-        MATCHING=0
         printf "."
         sleep 2
     done
