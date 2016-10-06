@@ -6,10 +6,12 @@ template {
 template {
     source = "/etc/acme/templates/privkey.ctmpl"
     destination = "/var/www/ssl/privkey.pem"
+    command = "/usr/local/bin/reload.sh"
 }
 template {
     source = "/etc/acme/templates/fullchain.ctmpl"
     destination = "/var/www/ssl/fullchain.pem"
+    command = "/usr/local/bin/reload.sh"
 }
 template {
     source = "/etc/acme/templates/chain.ctmpl"

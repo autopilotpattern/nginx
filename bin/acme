@@ -124,8 +124,7 @@ case "$1" in
         shift
         renewConsulSession &&
         acquireLeader &&
-        ${SCRIPTPATH}/dehydrated --cron --domain ${ACME_DOMAIN} --hook /etc/acme/dehydrated/hook.sh --config /etc/acme/dehydrated/config.${ACME_ENV} &&
-        ${SCRIPTPATH}/reload.sh onChange
+        ${SCRIPTPATH}/dehydrated --cron --domain ${ACME_DOMAIN} --hook /etc/acme/dehydrated/hook.sh --config /etc/acme/dehydrated/config.${ACME_ENV}
         ;;
     renew-certs)
         shift
