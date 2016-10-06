@@ -12,9 +12,10 @@ COPY package.json /opt/example/
 RUN cd /opt/example && npm install
 
 # Add Consul from https://releases.hashicorp.com/consul
-RUN export CHECKSUM=abdf0e1856292468e2c9971420d73b805e93888e006c76324ae39416edcf0627 \
-    && curl -vo /tmp/consul.zip "https://releases.hashicorp.com/consul/0.6.4/consul_0.6.4_linux_amd64.zip" \
-    && echo "${CHECKSUM}  /tmp/consul.zip" | sha256sum -c \
+RUN export CONSUL_VERSION=0.7.0 \
+    && export CONSUL_CHECKSUM=b350591af10d7d23514ebaa0565638539900cdb3aaa048f077217c4c46653dd8 \
+    && curl --retry 7 --fail -vo /tmp/consul.zip "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip" \
+    && echo "${CONSUL_CHECKSUM}  /tmp/consul.zip" | sha256sum -c \
     && unzip /tmp/consul -d /usr/local/bin \
     && rm /tmp/consul.zip \
     && mkdir /config
