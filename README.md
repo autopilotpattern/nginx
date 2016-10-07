@@ -42,19 +42,11 @@ open "http://$(triton ip nginx_nginx_1)/example"
 
 ### Configuring LetsEncrypt (ACME)
 
-Setting the `ACME_DOMAIN` environment variable will enable LetsEncrypt within
-the image. The image will automatically acquire certificates for the given
-domain, and renew them over time. If you scale to multiple instances of Nginx,
-they will elect a leader who will be responsible for renewing the certificates. 
-Any challenge response tokens as well as acquired certificates will be
-replicated to all Nginx instances. 
+Setting the `ACME_DOMAIN` environment variable will enable LetsEncrypt within the image. The image will automatically acquire certificates for the given domain, and renew them over time. If you scale to multiple instances of Nginx, they will elect a leader who will be responsible for renewing the certificates.  Any challenge response tokens as well as acquired certificates will be replicated to all Nginx instances. 
 
-By default, this process will use the LetsEncrypt staging endpoint, so as not to
-impact your api limits. When ready for production, you must also set the
-`ACME_ENV` environment variable to `production`. 
+By default, this process will use the LetsEncrypt staging endpoint, so as not to impact your api limits. When ready for production, you must also set the `ACME_ENV` environment variable to `production`. 
 
-You must ensure the domain resolves to your Nginx containers so that they can
-respond to the ACME http challenges.
+You must ensure the domain resolves to your Nginx containers so that they can respond to the ACME http challenges.
 
 Example excerpt from `docker-compose.yml` with LetsEncrypt enabled:
 
