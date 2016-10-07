@@ -59,8 +59,10 @@ RUN export JQ_VERSION=1.5 \
 COPY etc /etc
 COPY bin /usr/local/bin
 
-# SSL certs written here
+# Usable SSL certs written here
 RUN mkdir -p /var/www/ssl
+# Temporary/work space for keys
+RUN mkdir -p /var/www/acme/ssl
 # ACME challenge tokens written here
 RUN mkdir -p /var/www/acme/challenge
 # Consul session data written here

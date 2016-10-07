@@ -18,7 +18,7 @@ preStart() {
 # then gracefully reload Nginx
 onChange() {
     local TEMPLATE="nginx.conf.ctmpl"
-    if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem -a "$(cat ${CERT_DIR}/fullchain.pem)" != "" -a "$(cat ${CERT_DIR}/privkey.pem)" != "" ]; then
+    if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem ]; then
         TEMPLATE="nginx-ssl.conf.ctmpl"
     fi
     consul-template \

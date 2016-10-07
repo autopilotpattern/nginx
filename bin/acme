@@ -16,6 +16,7 @@ SESSION_DIR_DEFAULT="/var/consul"
 SESSION_DIR=${SESSION_DIR:-$SESSION_DIR_DEFAULT}
 SESSION_FILE=${SESSION_DIR}/session
 
+TEMP_CERT_DIR="/var/www/acme/ssl"
 CERT_DIR="/var/www/ssl"
 
 ACME_ENV=${ACME_ENV:-staging}
@@ -100,6 +101,18 @@ function generateChallengeToken () {
     rm ${IN}
 }
 
+function updateKeys () {
+    local TEMP_FULLCHAIN="${TEMP_CERT_DIR}/fullchain.pem"
+    local TEMP_PRIVKEY="${TEMP_CERT_DIR}/privkey.pem"
+    local FULLCHAIN="${CERT_DIR}/fullchain.pem"
+    local PRIVKEY="${CERT_DIR}/privkey.pem"
+    if [ -f ${TEMP_FULLCHAIN} -a -f ${TEMP_PRIVKEY} -a "$(cat ${TEMP_FULLCHAIN})" != "" -a "$(cat ${TEMP_PRIVKEY})" != "" ]; then
+        cp -f $TEMP_FULLCHAIN $FULLCHAIN
+        cp -f $TEMP_PRIVKEY $PRIVKEY
+        $SCRIPTPATH/reload.sh
+    fi
+}
+
 case "$1" in
     get-consul-session)
         getConsulSession
@@ -118,7 +131,7 @@ case "$1" in
         ( acquireLeader || exit 0 )
         ;;
     init)
-        if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem -a "$(cat ${CERT_DIR}/fullchain.pem)" != "" -a "$(cat ${CERT_DIR}/privkey.pem)" != "" ]; then
+        if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem ]; then
             exit 0
         fi
         shift
@@ -140,6 +153,9 @@ case "$1" in
         ;;
     generate-challenge-token)
         generateChallengeToken $2 $3
+        ;;
+    update-keys)
+        updateKeys
         ;;
     *)
         echo $"Usage: $0 [ {get,create,renew}-consul-session | acquire-leader | init | checkin | renew-certs | clean-certs | generate-challenge-token ]"
