@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -o pipefail
+
 CONSUL_HOST_DEFAULT="localhost"
 if [ "${CONSUL_AGENT}" = "" -a "${CONSUL}" != "" ]; then
     CONSUL_HOST_DEFAULT=${CONSUL}
@@ -12,10 +14,9 @@ function deploy_challenge {
     local DOMAIN="${1}" TOKEN_FILENAME="${2}" TOKEN_VALUE="${3}"
     local TOKEN_DEPLOY_RETRY_LIMIT=6
 
-    curl -sX PUT -d "${TOKEN_FILENAME}" ${CONSUL_KEY_ROOT}/acme/challenge/token-filename | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
-    curl -sX PUT -d "${TOKEN_VALUE}" ${CONSUL_KEY_ROOT}/acme/challenge/token-value | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
+    (curl -sX PUT -d "${TOKEN_FILENAME}" ${CONSUL_KEY_ROOT}/acme/challenge/token-filename | log \
+        && curl -sX PUT -d "${TOKEN_VALUE}" ${CONSUL_KEY_ROOT}/acme/challenge/token-value | log \
+    ) || (log "${FUNCNAME} failed"; return 1)
 
     # verify all nginx containers are responding with challenge before continuing
     local NGINX_INSTANCES=$(curl -s "${CONSUL_ROOT}/catalog/service/nginx" | jq -Mr '.[].ServiceAddress')
@@ -40,29 +41,26 @@ function deploy_challenge {
 function clean_challenge {
     local DOMAIN="${1}" TOKEN_FILENAME="${2}" TOKEN_VALUE="${3}"
 
-    curl -sX DELETE ${CONSUL_KEY_ROOT}/acme/challenge/token-filename | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
-    curl -sX DELETE ${CONSUL_KEY_ROOT}/acme/challenge/token-value | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
-    curl -sX PUT -d "${TOKEN_FILENAME}" ${CONSUL_KEY_ROOT}/acme/challenge/last-token-filename | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
+    curl -sX DELETE ${CONSUL_KEY_ROOT}/acme/challenge/token-filename | log \
+        && curl -sX DELETE ${CONSUL_KEY_ROOT}/acme/challenge/token-value | log \
+        && curl -sX PUT -d "${TOKEN_FILENAME}" ${CONSUL_KEY_ROOT}/acme/challenge/last-token-filename | log \
+        && return 0
+    log "${FUNCNAME} failed"
+    return 1
 }
 
 function deploy_cert {
     local DOMAIN="${1}" KEYFILE="${2}" CERTFILE="${3}" FULLCHAINFILE="${4}" CHAINFILE="${5}" TIMESTAMP="${6}"
 
-    curl -sX PUT -d "$(cat ${KEYFILE})" ${CONSUL_KEY_ROOT}/acme/key | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
-    curl -sX PUT -d "$(cat ${CERTFILE})" ${CONSUL_KEY_ROOT}/acme/cert | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
-    curl -sX PUT -d "$(cat ${CHAINFILE})" ${CONSUL_KEY_ROOT}/acme/chain | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
-    curl -sX PUT -d "$(cat ${FULLCHAINFILE})" ${CONSUL_KEY_ROOT}/acme/fullchain | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
-    curl -sX PUT -d "${TIMESTAMP}" ${CONSUL_KEY_ROOT}/acme/timestamp | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
-    curl -sX PUT -d "$(date +%s)" ${CONSUL_KEY_ROOT}/acme/touched | log
-    test ${PIPESTATUS[0]} -eq 0 || (log "${FUNCNAME} failed" && return)
+    curl -sX PUT -d "$(cat ${KEYFILE})" ${CONSUL_KEY_ROOT}/acme/key | log \
+        && curl -sX PUT -d "$(cat ${CERTFILE})" ${CONSUL_KEY_ROOT}/acme/cert | log \
+        && curl -sX PUT -d "$(cat ${CHAINFILE})" ${CONSUL_KEY_ROOT}/acme/chain | log \
+        && curl -sX PUT -d "$(cat ${FULLCHAINFILE})" ${CONSUL_KEY_ROOT}/acme/fullchain | log \
+        && curl -sX PUT -d "${TIMESTAMP}" ${CONSUL_KEY_ROOT}/acme/timestamp | log \
+        && curl -sX PUT -d "$(date +%s)" ${CONSUL_KEY_ROOT}/acme/touched | log \
+        && return 0
+    log "${FUNCNAME} failed"
+    return 1
 }
 
 function unchanged_cert {
