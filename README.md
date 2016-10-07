@@ -46,7 +46,7 @@ Setting the `ACME_DOMAIN` environment variable will enable LetsEncrypt within th
 
 By default, this process will use the LetsEncrypt staging endpoint, so as not to impact your api limits. When ready for production, you must also set the `ACME_ENV` environment variable to `production`. 
 
-You must ensure the domain resolves to your Nginx containers so that they can respond to the ACME http challenges.
+You must ensure the domain resolves to your Nginx containers so that they can respond to the ACME http challenges. Triton users may [refer to this document](https://docs.joyent.com/public-cloud/network/cns/faq#can-i-use-my-own-domain-name-with-triton-cns) for more information on how to insure your domain resolves to your Triton containers.
 
 Example excerpt from `docker-compose.yml` with LetsEncrypt enabled:
 
