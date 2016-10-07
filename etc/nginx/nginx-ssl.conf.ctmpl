@@ -46,7 +46,23 @@ http {
     }{{ end }}
 
     server {
-        listen       80;
+        listen      80;
+        server_name _;
+
+        location / {
+            return 301 https://$host$request_uri;
+        }
+
+        location /nginx-health {
+            stub_status;
+            allow 127.0.0.1;
+            deny all;
+            access_log /var/log/nginx/access.log  main if=$isError;
+        }
+    }
+
+    server {
+        listen       443 ssl;
         server_name  _;
 
         location /nginx-health {
@@ -56,12 +72,10 @@ http {
             access_log /var/log/nginx/access.log  main if=$isError;
         }
 
-        {{ if $acme_domain }}
         location /.well-known/acme-challenge {
             alias /var/www/acme/challenge;
         }
-        {{ end }}
-        listen 443 ssl;
+
         ssl_certificate /var/www/ssl/fullchain.pem;
         ssl_certificate_key /var/www/ssl/privkey.pem;
         ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
