@@ -22,7 +22,7 @@
     {
       "name": "nginx-public-ssl",
       "port": 443,
-      "health": "/usr/local/bin/acme init && /usr/bin/curl --insecure --fail --silent --show-error --output /dev/null https://localhost/nginx-health",
+      "health": "/usr/local/bin/acme init && /usr/bin/curl --insecure --fail --silent --show-error --output /dev/null --header \"HOST: {{ .ACME_DOMAIN }}\" https://localhost/nginx-health",
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth1", "eth0"]
