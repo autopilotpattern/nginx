@@ -3,14 +3,16 @@ nginx:
         file: docker-compose.yml
         service: nginx
     build: .
-    mem_limit: 128g
+    mem_limit: 128m
     environment:
         - CONSUL=consul
         - CONSUL_AGENT=1
+        - ACME_ENV=staging
     links:
         - consul:consul
     ports:
         - 80:80
+        - 443:443
         - 9090:9090 # telemetry endpoint
 
 example:

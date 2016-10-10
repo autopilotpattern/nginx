@@ -11,8 +11,10 @@ nginx:
     environment:
         - BACKEND=example
         - CONSUL_AGENT=1
+        - ACME_ENV=staging
     ports:
         - 80
+        - 443
         - 9090 # so we can see telemetry
     labels:
         - triton.cns.services=nginx
@@ -32,7 +34,7 @@ example:
 # Start with a single host which will bootstrap the cluster.
 # In production we'll want to use an HA cluster.
 consul:
-    image: progrium/consul:latest
+    image: consul:v0.7.0
     restart: always
     mem_limit: 128m
     expose:
@@ -48,4 +50,4 @@ consul:
        - 127.0.0.1
     labels:
         - triton.cns.services=consul
-    command: -server -bootstrap -ui-dir /ui
+    command: agent -server -client=0.0.0.0 -bootstrap -ui

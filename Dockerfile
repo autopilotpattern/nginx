@@ -11,8 +11,8 @@ RUN apt-get update \
 
 # Install Consul
 # Releases at https://releases.hashicorp.com/consul
-RUN export CONSUL_VERSION=0.6.4 \
-    && export CONSUL_CHECKSUM=abdf0e1856292468e2c9971420d73b805e93888e006c76324ae39416edcf0627 \
+RUN export CONSUL_VERSION=0.7.0 \
+    && export CONSUL_CHECKSUM=b350591af10d7d23514ebaa0565638539900cdb3aaa048f077217c4c46653dd8 \
     && curl --retry 7 --fail -vo /tmp/consul.zip "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip" \
     && echo "${CONSUL_CHECKSUM}  /tmp/consul.zip" | sha256sum -c \
     && unzip /tmp/consul -d /usr/local/bin \
@@ -43,9 +43,30 @@ RUN export CONTAINERPILOT_CHECKSUM=ec9dbedaca9f4a7a50762f50768cbc42879c7208 \
     && tar zxf /tmp/containerpilot.tar.gz -C /usr/local/bin \
     && rm /tmp/containerpilot.tar.gz
 
+# Add Dehydrated
+RUN export DEHYDRATED_VERSION=v0.3.1 \
+    && curl --retry 8 --fail -Lso /tmp/dehydrated.tar.gz "https://github.com/lukas2511/dehydrated/archive/${DEHYDRATED_VERSION}.tar.gz" \
+    && tar xzf /tmp/dehydrated.tar.gz -C /tmp \
+    && mv /tmp/dehydrated-0.3.1/dehydrated /usr/local/bin \
+    && rm -rf /tmp/dehydrated-0.3.1
+
+# Add jq
+RUN export JQ_VERSION=1.5 \
+    && curl --retry 8 --fail -Lso /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" \
+    && chmod a+x /usr/local/bin/jq
+
 # Add our configuration files and scripts
 COPY etc /etc
 COPY bin /usr/local/bin
+
+# Usable SSL certs written here
+RUN mkdir -p /var/www/ssl
+# Temporary/work space for keys
+RUN mkdir -p /var/www/acme/ssl
+# ACME challenge tokens written here
+RUN mkdir -p /var/www/acme/challenge
+# Consul session data written here
+RUN mkdir -p /var/consul
 
 CMD [ "/usr/local/bin/containerpilot", \
     "nginx", \

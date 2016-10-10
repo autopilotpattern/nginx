@@ -1,0 +1,3 @@
+{{if key "nginx/acme/challenge/token-filename"}}{{key "nginx/acme/challenge/token-filename"}}{{end}}
+{{if key "nginx/acme/challenge/token-value"}}{{key "nginx/acme/challenge/token-value"}}{{end}}
+{{if key "nginx/acme/challenge/last-token-filename"}}{{key "nginx/acme/challenge/last-token-filename"}}{{end}}

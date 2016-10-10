@@ -2,6 +2,7 @@
 
 SERVICE_NAME=${SERVICE_NAME:-nginx}
 CONSUL=${CONSUL:-consul}
+CERT_DIR="/var/www/ssl"
 
 # Render Nginx configuration template using values from Consul,
 # but do not reload because Nginx has't started yet
@@ -16,11 +17,15 @@ preStart() {
 # Render Nginx configuration template using values from Consul,
 # then gracefully reload Nginx
 onChange() {
+    local TEMPLATE="nginx.conf.ctmpl"
+    if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem ]; then
+        TEMPLATE="nginx-ssl.conf.ctmpl"
+    fi
     consul-template \
         -once \
         -dedup \
         -consul ${CONSUL}:8500 \
-        -template "/etc/nginx/nginx.conf.ctmpl:/etc/nginx/nginx.conf:nginx -s reload"
+        -template "/etc/nginx/${TEMPLATE}:/etc/nginx/nginx.conf:nginx -s reload"
 }
 
 help() {

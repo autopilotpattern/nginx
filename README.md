@@ -1,5 +1,5 @@
 Autopilot Pattern Nginx
-==========
+=======================
 
 *A re-usable Nginx base image implemented according to the [Autopilot Pattern](http://autopilotpattern.io/) for automatic discovery and configuration.*
 
@@ -38,4 +38,33 @@ You can open the demo app that Nginx is proxying by opening a browser to the Ngi
 
 ```bash
 open "http://$(triton ip nginx_nginx_1)/example"
+```
+
+### Configuring LetsEncrypt (ACME)
+
+Setting the `ACME_DOMAIN` environment variable will enable LetsEncrypt within the image. The image will automatically acquire certificates for the given domain, and renew them over time. If you scale to multiple instances of Nginx, they will elect a leader who will be responsible for renewing the certificates.  Any challenge response tokens as well as acquired certificates will be replicated to all Nginx instances. 
+
+By default, this process will use the LetsEncrypt staging endpoint, so as not to impact your api limits. When ready for production, you must also set the `ACME_ENV` environment variable to `production`. 
+
+You must ensure the domain resolves to your Nginx containers so that they can respond to the ACME http challenges. Triton users may [refer to this document](https://docs.joyent.com/public-cloud/network/cns/faq#can-i-use-my-own-domain-name-with-triton-cns) for more information on how to insure your domain resolves to your Triton containers.
+
+Example excerpt from `docker-compose.yml` with LetsEncrypt enabled:
+
+```yaml
+nginx:
+    image: autopilotpattern/nginx
+    restart: always
+    mem_limit: 512m
+    env_file: _env
+    environment:
+        - BACKEND=example
+        - CONSUL_AGENT=1
+        - ACME_ENV=staging
+        - ACME_DOMAIN=example.com
+    ports:
+        - 80
+        - 443
+        - 9090
+    labels:
+        - triton.cns.services=nginx
 ```
