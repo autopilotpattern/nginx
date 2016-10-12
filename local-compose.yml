@@ -8,6 +8,7 @@ nginx:
         - CONSUL=consul
         - CONSUL_AGENT=1
         - ACME_ENV=staging
+        - ACME_DOMAIN=dev.pincin.com
     links:
         - consul:consul
     ports:
