@@ -1,5 +1,5 @@
 {
-  "consul": "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ .CONSUL }}{{ end }}:8500",
+  "consul": "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ if .CONSUL }}{{ .CONSUL }}{{ else }}consul{{ end }}{{ end }}:8500",
   "preStart": "/usr/local/bin/reload.sh preStart",
   "logging": {"level": "DEBUG"},
   "services": [
@@ -41,7 +41,7 @@
                   "-data-dir=/var/lib/consul",
                   "-config-dir=/etc/consul",
                   "-rejoin",
-                  "-retry-join", "{{ .CONSUL }}",
+                  "-retry-join", "{{ if .CONSUL }}{{ .CONSUL }}{{ else }}consul{{ end }}",
                   "-retry-max", "10",
                   "-retry-interval", "10s"],
       "restarts": "unlimited"
@@ -51,7 +51,7 @@
     {
       "command": ["/usr/local/bin/consul-template",
                   "-config", "/etc/acme/watch.hcl",
-                  "-consul", "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ .CONSUL }}{{ end }}:8500"],
+                  "-consul", "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ if .CONSUL }}{{ .CONSUL }}{{ else }}consul{{ end }}{{ end }}:8500"],
       "restarts": "unlimited"
     }{{ end }}],
   "telemetry": {
