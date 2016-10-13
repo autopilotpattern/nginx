@@ -21,10 +21,10 @@ RUN export CONSUL_VERSION=0.7.0 \
     && mkdir /config
 
 # Add Containerpilot and set its configuration
-ENV CONTAINERPILOT_VER 2.3.0
+ENV CONTAINERPILOT_VER 2.4.3
 ENV CONTAINERPILOT file:///etc/containerpilot.json
 
-RUN export CONTAINERPILOT_CHECKSUM=ec9dbedaca9f4a7a50762f50768cbc42879c7208 \
+RUN export CONTAINERPILOT_CHECKSUM=2c469a0e79a7ac801f1c032c2515dd0278134790 \
     && curl -Lso /tmp/containerpilot.tar.gz \
          "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
     && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
