@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -o pipefail
 
-CONSUL_HOST_DEFAULT="localhost"
-if [ "${CONSUL_AGENT}" = "" -a "${CONSUL}" != "" ]; then
-    CONSUL_HOST_DEFAULT=${CONSUL}
+CONSUL_HOST_DEFAULT=${CONSUL:-consul}
+if [ "${CONSUL_AGENT}" != "" ]; then
+    CONSUL_HOST_DEFAULT="localhost"
 fi
 CONSUL_HOST=${CONSUL_HOST:-$CONSUL_HOST_DEFAULT}
 CONSUL_ROOT="http://${CONSUL_HOST}:8500/v1"
