@@ -56,7 +56,10 @@ RUN export JQ_VERSION=1.5 \
     && chmod a+x /usr/local/bin/jq
 
 # Add our configuration files and scripts
-COPY etc /etc
+RUN rm -f /etc/nginx/conf.d/default.conf
+COPY etc/acme /etc/acme
+COPY etc/containerpilot.json /etc/
+COPY etc/nginx /etc/nginx/templates
 COPY bin /usr/local/bin
 
 # Usable SSL certs written here
