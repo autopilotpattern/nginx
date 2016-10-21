@@ -60,14 +60,14 @@
         "help": "Number of accepted connnections that were not handled",
         "type": "gauge",
         "poll": 5,
-        "check": ["sensor.sh", "unhandled"]
+        "check": ["sensor", "unhandled"]
       },
       {
         "name": "nginx_connections_load",
         "help": "Ratio of active connections (less waiting) to the maximum worker connections",
         "type": "gauge",
         "poll": 5,
-        "check": ["sensor.sh", "connections_load"]
+        "check": ["sensor", "connections_load"]
       }
     ]
   },

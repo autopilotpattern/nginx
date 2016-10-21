@@ -109,7 +109,7 @@ function updateKeys () {
     if [ -f ${TEMP_FULLCHAIN} -a -f ${TEMP_PRIVKEY} -a "$(cat ${TEMP_FULLCHAIN} 2> /dev/null)" != "" -a "$(cat ${TEMP_PRIVKEY} 2> /dev/null)" != "" ]; then
         cp -f $TEMP_FULLCHAIN $FULLCHAIN
         cp -f $TEMP_PRIVKEY $PRIVKEY
-        $SCRIPTPATH/reload.sh
+        $SCRIPTPATH/reload
     fi
 }
 
