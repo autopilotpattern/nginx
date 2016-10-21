@@ -1,5 +1,5 @@
-# A minimal Nginx container including ContainerPilot and a simple virtualhost config
-FROM nginx:latest
+# A minimal Nginx container including ContainerPilot
+FROM nginx:1.11
 
 # Add some stuff via apt-get
 RUN apt-get update \
