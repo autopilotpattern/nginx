@@ -1,12 +1,11 @@
 {
   "consul": "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ if .CONSUL }}{{ .CONSUL }}{{ else }}consul{{ end }}{{ end }}:8500",
-  "preStart": "/usr/local/bin/reload.sh preStart",
-  "logging": {"level": "DEBUG"},
+  "preStart": "generate-config",
   "services": [
     {
       "name": "nginx",
       "port": 80,
-      "health": "/usr/bin/curl --fail --silent --show-error --output /dev/null http://localhost/nginx-health",
+      "health": "curl -fsSo /dev/null http://localhost/nginx-health",
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth0"]
@@ -14,7 +13,7 @@
     {
       "name": "nginx-public",
       "port": 80,
-      "health": "/usr/bin/curl --fail --silent --show-error --output /dev/null http://localhost/nginx-health",
+      "health": "curl -fsSo /dev/null http://localhost/nginx-health",
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth1", "eth0"]
@@ -22,7 +21,7 @@
     {
       "name": "nginx-ssl",
       "port": 443,
-      "health": "/usr/local/bin/acme init && /usr/bin/curl --insecure --fail --silent --show-error --output /dev/null --header \"HOST: {{ .ACME_DOMAIN }}\" https://localhost/nginx-health",
+      "health": "acme init && curl -kfsSo /dev/null https://localhost/nginx-health",
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth0"]
@@ -30,22 +29,15 @@
     {
       "name": "nginx-public-ssl",
       "port": 443,
-      "health": "/usr/bin/curl --insecure --fail --silent --show-error --output /dev/null --header \"HOST: {{ .ACME_DOMAIN }}\" https://localhost/nginx-health",
+      "health": "curl -kfsSo /dev/null https://localhost/nginx-health",
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth1", "eth0"]
     }{{ end }}
   ],
-  "backends": [
-    {
-      "name": "{{ .BACKEND }}",
-      "poll": 7,
-      "onChange": "/usr/local/bin/reload.sh"
-    }
-  ],
   "coprocesses": [{{ if .CONSUL_AGENT }}
     {
-      "command": ["/usr/local/bin/consul", "agent",
+      "command": ["consul", "agent",
                   "-data-dir=/var/lib/consul",
                   "-config-dir=/etc/consul",
                   "-rejoin",
@@ -57,9 +49,7 @@
     {{ if and .CONSUL_AGENT .ACME_DOMAIN }},{{ end }}
     {{ if .ACME_DOMAIN }}
     {
-      "command": ["/usr/local/bin/consul-template",
-                  "-config", "/etc/acme/watch.hcl",
-                  "-consul", "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ if .CONSUL }}{{ .CONSUL }}{{ else }}consul{{ end }}{{ end }}:8500"],
+      "command": ["acme", "watch"],
       "restarts": "unlimited"
     }{{ end }}],
   "telemetry": {
@@ -70,35 +60,22 @@
         "help": "Number of accepted connnections that were not handled",
         "type": "gauge",
         "poll": 5,
-        "check": ["/usr/local/bin/sensor.sh", "unhandled"]
+        "check": ["sensor.sh", "unhandled"]
       },
       {
         "name": "nginx_connections_load",
         "help": "Ratio of active connections (less waiting) to the maximum worker connections",
         "type": "gauge",
         "poll": 5,
-        "check": ["/usr/local/bin/sensor.sh", "connections_load"]
+        "check": ["sensor.sh", "connections_load"]
       }
     ]
   },
   "tasks": [{{ if .ACME_DOMAIN }}
     {
       "name": "acme-checkin",
-      "command": [ "/usr/local/bin/acme", "checkin" ],
-      "frequency": "5m",
+      "command": [ "acme", "checkin" ],
+      "frequency": "1h",
       "timeout": "10s"
-    },
-    {
-      "name": "acme-renew-certs",
-      "command": [ "/usr/local/bin/acme", "renew-certs" ],
-      "frequency": "12h",
-      "timeout": "10m"
-    },
-    {
-      "name": "clean-unused-certs",
-      "command": ["/usr/local/bin/acme", "clean-certs" ],
-      "frequency": "24h",
-      "timeout": "10m"
-    }{{ end }}
-  ]
+    }{{ end }}]
 }
