@@ -22,11 +22,10 @@ do
 done
 
 # Render Nginx configuration template using values from Consul
-for f in health.conf ssl.conf nginx.conf
-do
-    consul-template \
-        -once \
-        -dedup \
-        -consul ${CONSUL}:8500 \
-        -template "/etc/nginx/templates/${f}:/etc/nginx/${f}"
-done
+consul-template \
+    -once \
+    -dedup \
+    -consul ${CONSUL}:8500 \
+    -template "/etc/nginx/templates/health.conf:/etc/nginx/health.conf" \
+    -template "/etc/nginx/templates/ssl.conf:/etc/nginx/ssl.conf" \
+    -template "/etc/nginx/templates/nginx.conf:/etc/nginx/nginx.conf"
