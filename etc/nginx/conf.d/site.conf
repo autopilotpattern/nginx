@@ -1,0 +1,32 @@
+{{ $acme_domain := env "ACME_DOMAIN" }}
+{{ $ssl_ready := env "SSL_READY" }}
+
+# If we're listening on https, define an http listener that redirects everything to https
+{{ if eq $ssl_ready "true" }}
+server { 
+    server_name _;
+    listen      80;
+
+    include /etc/nginx/health.conf;
+    
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+{{ end }}
+
+server {
+    server_name _;
+    # Listen on port 80 unless we have certificates installed, then listen on 443
+    listen {{ if ne $ssl_ready "true" }}80{{ else }}443 ssl{{ end }};
+
+    include /etc/nginx/health.conf;
+
+    location /.well-known/acme-challenge {
+        alias /var/www/acme/challenge;
+    }
+
+    location / {
+        root /usr/share/nginx/html;
+    }
+}
