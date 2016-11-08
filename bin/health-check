@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+LE_STAGING_CACERT=/etc/acme/ca/lets-encrypt-staging.crt
+ACME_ENV=${ACME_ENV:-staging}
+
+SCHEME=$1
+
+if [[ $SCHEME == "https" ]]; then 
+    grep -q $ACME_DOMAIN /etc/hosts || printf "\n\n127.0.0.1 ${ACME_DOMAIN}\n" >> /etc/hosts
+    if [[ "$ACME_ENV" == "staging" ]]; then
+        curl --cacert $LE_STAGING_CACERT -fsSo /dev/null "https://${ACME_DOMAIN}/nginx-health"
+    else
+        curl -fsSo /dev/null "https://${ACME_DOMAIN}/nginx-health"
+    fi
+else
+    curl -fsSo /dev/null "http://localhost/nginx-health"
+fi

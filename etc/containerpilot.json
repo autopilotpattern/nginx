@@ -5,7 +5,7 @@
     {
       "name": "nginx",
       "port": 80,
-      "health": "curl -fsSo /dev/null http://localhost/nginx-health",
+      "health": "health-check http",
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth0"]
@@ -13,7 +13,7 @@
     {
       "name": "nginx-public",
       "port": 80,
-      "health": "curl -fsSo /dev/null http://localhost/nginx-health",
+      "health": "health-check http",
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth1", "eth0"]
@@ -21,7 +21,7 @@
     {
       "name": "nginx-ssl",
       "port": 443,
-      "health": "acme init && curl -kfsSo /dev/null https://localhost/nginx-health",
+      "health": "acme init && health-check https",
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth0"]
@@ -29,7 +29,7 @@
     {
       "name": "nginx-public-ssl",
       "port": 443,
-      "health": "curl -kfsSo /dev/null https://localhost/nginx-health",
+      "health": "health-check https",
       "poll": 10,
       "ttl": 25,
       "interfaces": ["eth1", "eth0"]
