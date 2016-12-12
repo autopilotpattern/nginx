@@ -37,14 +37,19 @@ http {
     {{ $backend := env "BACKEND" }}
     {{ $acme_domain := env "ACME_DOMAIN" }}
     {{ $ssl_ready := env "SSL_READY" }}
-    {{ if service $backend }}
-    upstream {{ $backend }} {
+
+		# loop for each backend
+		{{ range $b := $backend | split " " }}
+    {{ if service $b }}
+    upstream {{ $b }} {
         # write the address:port pairs for each healthy backend instance
-        {{range service $backend }}
+        {{range service $b }}
         server {{.Address}}:{{.Port}};
         {{end}}
         least_conn;
     }{{ end }}
+		{{ end }}
+		# end loop for each backend
 
     server {
         listen      80;
@@ -61,14 +66,16 @@ http {
             alias /var/www/acme/challenge;
         }
 
-        {{ if service $backend }}
-        location = /{{ $backend }} {
-            return 301 /{{ $backend }}/;
+				{{ range $b := $backend | split " " }}
+        {{ if service $b }}
+        location = /{{ $b }} {
+            return 301 /{{ $b }}/;
         }
-        location /{{ $backend }} {
-            proxy_pass http://{{ $backend }};
+        location /{{ $b }} {
+            proxy_pass http://{{ $b }};
             proxy_redirect off;
         }
+				{{ end }}
         {{ end }}
         {{ end }}
 
@@ -107,15 +114,17 @@ http {
         ssl_stapling_verify on;
         add_header Strict-Transport-Security max-age=15768000;
 
-        {{ if service $backend }}
-        location = /{{ $backend }} {
-            return 301 /{{ $backend }}/;
+				{{ range $b := $backend | split " " }}
+        {{ if service $b }}
+        location = /{{ $b }} {
+            return 301 /{{ $b }}/;
         }
 
-        location /{{ $backend }} {
-            proxy_pass http://{{ $backend }};
+        location /{{ $b }} {
+            proxy_pass http://{{ $b }};
             proxy_redirect off;
         }{{ end }}
+				{{ end }}
     }
     {{ end }}
 }
