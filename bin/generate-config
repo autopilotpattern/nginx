@@ -11,13 +11,13 @@ if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem ]; then
     export SSL_READY="true"
 fi
 
-# Generate a conf.d config file for every corresponding cond.d Consul template
+# Generate a conf.d config file for every corresponding conf.d Consul template
 for f in $(ls -1 /etc/nginx/templates/conf.d/)
 do
     consul-template \
         -once \
         -dedup \
-        -consul ${CONSUL}:8500 \
+        -consul-addr "${CONSUL}:8500" \
         -template "/etc/nginx/templates/conf.d/${f}:/etc/nginx/conf.d/${f}"
 done
 
@@ -25,7 +25,7 @@ done
 consul-template \
     -once \
     -dedup \
-    -consul ${CONSUL}:8500 \
+    -consul-addr "${CONSUL}:8500" \
     -template "/etc/nginx/templates/health.conf:/etc/nginx/health.conf" \
     -template "/etc/nginx/templates/ssl.conf:/etc/nginx/ssl.conf" \
     -template "/etc/nginx/templates/nginx.conf:/etc/nginx/nginx.conf"
