@@ -1,5 +1,5 @@
-# A minimal Nginx container including ContainerPilot and a simple virtualhost config
-FROM nginx:latest
+# A minimal Nginx container including ContainerPilot
+FROM nginx:1.11
 
 # Add some stuff via apt-get
 RUN apt-get update \
@@ -33,10 +33,10 @@ RUN export CONSUL_TEMPLATE_VERSION=0.14.0 \
     && rm /tmp/consul-template.zip
 
 # Add Containerpilot and set its configuration
-ENV CONTAINERPILOT_VER 2.4.3
+ENV CONTAINERPILOT_VER 2.4.4
 ENV CONTAINERPILOT file:///etc/containerpilot.json
 
-RUN export CONTAINERPILOT_CHECKSUM=2c469a0e79a7ac801f1c032c2515dd0278134790 \
+RUN export CONTAINERPILOT_CHECKSUM=6194ee482dae95844046266dcec2150655ef80e9 \
     && curl -Lso /tmp/containerpilot.tar.gz \
          "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
     && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
@@ -56,7 +56,10 @@ RUN export JQ_VERSION=1.5 \
     && chmod a+x /usr/local/bin/jq
 
 # Add our configuration files and scripts
-COPY etc /etc
+RUN rm -f /etc/nginx/conf.d/default.conf
+COPY etc/acme /etc/acme
+COPY etc/containerpilot.json /etc/
+COPY etc/nginx /etc/nginx/templates
 COPY bin /usr/local/bin
 
 # Usable SSL certs written here
