@@ -42,8 +42,12 @@ test-runner:
 
 ## Push the current application container images to the Docker Hub
 push:
-	$(dockerLocal) push $(example):$(tag)
 	$(dockerLocal) push $(image):$(tag)
+
+## Push the current example application container images to the Docker Hub
+push-examples:
+	$(dockerLocal) push $(example):$(tag)
+	$(dockerLocal) push $(backend):$(tag)
 	$(dockerLocal) push $(testImage):$(tag)
 
 ## Tag the current images as 'latest' and push them to the Docker Hub
@@ -63,12 +67,21 @@ ship:
 pull:
 	docker pull $(image):$(tag)
 
+## Pull the test target images from the docker Hub
+pull-examples:
+	docker pull $(example):$(tag)
+	docker pull $(backend):$(tag)
+	docker pull $(testImage):$(tag)
+
 $(DOCKER_CERT_PATH)/key.pub:
 	ssh-keygen -y -f $(DOCKER_CERT_PATH)/key.pem > $(DOCKER_CERT_PATH)/key.pub
 
 # For Jenkins test runner only: make sure we have public keys available
 SDC_KEYS_VOL ?= -v $(DOCKER_CERT_PATH):$(DOCKER_CERT_PATH)
 keys: $(DOCKER_CERT_PATH)/key.pub
+
+run-local:
+	cd ../examples/compose && TAG=$(tag) docker-compose up -d
 
 ## Run the integration test runner. Runs locally but targets Triton.
 test:
