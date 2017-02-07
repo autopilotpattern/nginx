@@ -35,31 +35,44 @@ class NginxStackTest(AutopilotPatternTest):
         self.nginx_cns = 'nginx-frontend.svc.{}.{}.triton.zone'.format(account, dc)
         os.environ['CONSUL'] = self.consul_cns
 
-    def test_scaleup(self):
+    def test_scaleup_and_down(self):
 
         self.wait_for_containers(timeout=300)
-        self.wait_for_service('backend', count=1, timeout=60)
-        self.wait_for_service('containerpilot', count=1, timeout=60)
-        self.wait_for_service('nginx', count=1, timeout=60)
-        self.wait_for_service('nginx-public', count=1, timeout=60)
+        self.wait_for_service('backend', count=1, timeout=120)
+        self.wait_for_service('containerpilot', count=1, timeout=120)
+        self.wait_for_service('nginx', count=1, timeout=120)
+        self.wait_for_service('nginx-public', count=1, timeout=120)
         # self.wait_for_service('nginx-public-ssl', count=1) # TODO
 
         self.compose_scale('backend', 2)
+        self.wait_for_service('backend', count=2, timeout=60)
+        self.compare_backends()
+
+        # netsplit a backend
+        self.docker_exec('backend_2', 'ifconfig eth0 down')
+        self.wait_for_service('backend', count=1)
+        self.compare_backends()
+
+        # heal netsplit
+        self.docker_exec('backend_2', 'ifconfig eth0 up')
         self.wait_for_service('backend', count=2)
+        self.compare_backends()
 
+
+    def compare_backends(self):
         expected = self.get_service_instances_from_consul('backend').sort()
-
-        def query_for_backend(self):
-            r = requests.get('http://{}'.format(self.nginx_cns)) # TODO: SSL
-            if r.status_code != 200:
-                self.fail('Expected 200 OK but got {}'.format(r.status_code))
-            return r.text.strip('HelloWorld\n ')
-
-        actual = list(set([query_for_backend(self) for _ in range(10)])).sort()
-
+        actual = list(set([self.query_for_backend() for _ in range(10)])).sort()
         self.assertEqual(expected, actual,
                          'Expected {} but got {} for Nginx backends'
                          .format(expected, actual))
+
+    def query_for_backend(self):
+        r = requests.get('http://{}'.format(self.nginx_cns)) # TODO: SSL
+        if r.status_code != 200:
+            self.fail('Expected 200 OK but got {}'.format(r.status_code))
+        return r.text.strip('HelloWorld\n ')
+
+
 
 
 if __name__ == "__main__":
