@@ -1,5 +1,5 @@
-# A minimal Nginx container including ContainerPilot and a simple virtualhost config
-FROM nginx:latest
+# A minimal Nginx container including ContainerPilot
+FROM nginx:1.11
 
 # Add some stuff via apt-get
 RUN apt-get update \
@@ -11,8 +11,8 @@ RUN apt-get update \
 
 # Install Consul
 # Releases at https://releases.hashicorp.com/consul
-RUN export CONSUL_VERSION=0.7.0 \
-    && export CONSUL_CHECKSUM=b350591af10d7d23514ebaa0565638539900cdb3aaa048f077217c4c46653dd8 \
+RUN export CONSUL_VERSION=0.7.3 \
+    && export CONSUL_CHECKSUM=901a3796b645c3ce3853d5160080217a10ad8d9bd8356d0b73fcd6bc078b7f82 \
     && curl --retry 7 --fail -vo /tmp/consul.zip "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip" \
     && echo "${CONSUL_CHECKSUM}  /tmp/consul.zip" | sha256sum -c \
     && unzip /tmp/consul -d /usr/local/bin \
@@ -25,18 +25,18 @@ RUN mkdir -p /etc/consul \
 
 # Install Consul template
 # Releases at https://releases.hashicorp.com/consul-template/
-RUN export CONSUL_TEMPLATE_VERSION=0.14.0 \
-    && export CONSUL_TEMPLATE_CHECKSUM=7c70ea5f230a70c809333e75fdcff2f6f1e838f29cfb872e1420a63cdf7f3a78 \
+RUN export CONSUL_TEMPLATE_VERSION=0.18.0 \
+    && export CONSUL_TEMPLATE_CHECKSUM=f7adf1f879389e7f4e881d63ef3b84bce5bc6e073eb7a64940785d32c997bc4b \
     && curl --retry 7 --fail -Lso /tmp/consul-template.zip "https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip" \
     && echo "${CONSUL_TEMPLATE_CHECKSUM}  /tmp/consul-template.zip" | sha256sum -c \
     && unzip /tmp/consul-template.zip -d /usr/local/bin \
     && rm /tmp/consul-template.zip
 
 # Add Containerpilot and set its configuration
-ENV CONTAINERPILOT_VER 2.4.3
+ENV CONTAINERPILOT_VER 2.7.0
 ENV CONTAINERPILOT file:///etc/containerpilot.json
 
-RUN export CONTAINERPILOT_CHECKSUM=2c469a0e79a7ac801f1c032c2515dd0278134790 \
+RUN export CONTAINERPILOT_CHECKSUM=687f7d83e031be7f497ffa94b234251270aee75b \
     && curl -Lso /tmp/containerpilot.tar.gz \
          "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
     && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
@@ -56,7 +56,10 @@ RUN export JQ_VERSION=1.5 \
     && chmod a+x /usr/local/bin/jq
 
 # Add our configuration files and scripts
-COPY etc /etc
+RUN rm -f /etc/nginx/conf.d/default.conf
+COPY etc/acme /etc/acme
+COPY etc/containerpilot.json /etc/
+COPY etc/nginx /etc/nginx/templates
 COPY bin /usr/local/bin
 
 # Usable SSL certs written here

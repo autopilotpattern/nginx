@@ -60,6 +60,13 @@
       "command": ["acme", "watch"],
       "restarts": "unlimited"
     }{{ end }}],
+  "backends": [
+    {
+      "name": "backend",
+      "poll": 7,
+      "onChange": "reload"
+    }
+  ],
   "telemetry": {
     "port": 9090,
     "sensors": [

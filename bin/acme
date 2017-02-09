@@ -58,7 +58,7 @@ function renewConsulSession () {
 
 function createConsulSession () {
     printf "Creating Consul session... "
-    local SID=$(curl -sX PUT -d '{"LockDelay":"0s","Name":"acme-lock","Behavior":"release","TTL":"600s"}' ${CONSUL_ROOT}/session/create | awk -F  '"' '{print $4}')
+    local SID=$(curl -sX PUT -d '{"LockDelay":"0s","Name":"acme-lock","Behavior":"release","TTL":"5400s"}' ${CONSUL_ROOT}/session/create | awk -F  '"' '{print $4}')
     rc=$?
     if [[ $rc -ne 0 ]]; then
         echo "failed"
@@ -106,10 +106,10 @@ function updateKeys () {
     local TEMP_PRIVKEY="${TEMP_CERT_DIR}/privkey.pem"
     local FULLCHAIN="${CERT_DIR}/fullchain.pem"
     local PRIVKEY="${CERT_DIR}/privkey.pem"
-    if [ -f ${TEMP_FULLCHAIN} -a -f ${TEMP_PRIVKEY} -a "$(cat ${TEMP_FULLCHAIN})" != "" -a "$(cat ${TEMP_PRIVKEY})" != "" ]; then
+    if [ -f ${TEMP_FULLCHAIN} -a -f ${TEMP_PRIVKEY} -a "$(cat ${TEMP_FULLCHAIN} 2> /dev/null)" != "" -a "$(cat ${TEMP_PRIVKEY} 2> /dev/null)" != "" ]; then
         cp -f $TEMP_FULLCHAIN $FULLCHAIN
         cp -f $TEMP_PRIVKEY $PRIVKEY
-        $SCRIPTPATH/reload.sh
+        $SCRIPTPATH/reload
     fi
 }
 
@@ -126,9 +126,8 @@ case "$1" in
     acquire-leader)
         acquireLeader
         ;;
-    checkin)
-        renewConsulSession &&
-        ( acquireLeader || exit 0 )
+    watch)
+        /usr/local/bin/consul-template -config /etc/acme/watch.hcl -consul $CONSUL_HOST:8500
         ;;
     init)
         if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem ]; then
@@ -142,13 +141,13 @@ case "$1" in
     renew-certs)
         shift
         renewConsulSession &&
-        acquireLeader &&
+        (acquireLeader || exit 0) &&
         ${SCRIPTPATH}/dehydrated --cron --domain ${ACME_DOMAIN} --hook /etc/acme/dehydrated/hook.sh --config /etc/acme/dehydrated/config.${ACME_ENV}
         ;;
     clean-certs)
         shift
         renewConsulSession &&
-        acquireLeader &&
+        (acquireLeader || exit 0) &&
         ${SCRIPTPATH}/dehydrated --cleanup --domain ${ACME_DOMAIN} --hook /etc/acme/dehydrated/hook.sh --config /etc/acme/dehydrated/config.${ACME_ENV}
         ;;
     generate-challenge-token)
@@ -156,6 +155,12 @@ case "$1" in
         ;;
     update-keys)
         updateKeys
+        ;;
+    checkin)
+        renewConsulSession &&
+        ( acquireLeader || exit 0 ) &&
+        ${SCRIPTPATH}/dehydrated --cron --domain ${ACME_DOMAIN} --hook /etc/acme/dehydrated/hook.sh --config /etc/acme/dehydrated/config.${ACME_ENV} &&
+        ${SCRIPTPATH}/dehydrated --cleanup --domain ${ACME_DOMAIN} --hook /etc/acme/dehydrated/hook.sh --config /etc/acme/dehydrated/config.${ACME_ENV}
         ;;
     *)
         echo $"Usage: $0 [ {get,create,renew}-consul-session | acquire-leader | init | checkin | renew-certs | clean-certs | generate-challenge-token ]"
