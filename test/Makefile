@@ -73,15 +73,12 @@ pull-examples:
 	docker pull $(backend):$(tag)
 	docker pull $(testImage):$(tag)
 
-$(DOCKER_CERT_PATH)/key.pub:
-	ssh-keygen -y -f $(DOCKER_CERT_PATH)/key.pem > $(DOCKER_CERT_PATH)/key.pub
-
-# For Jenkins test runner only: make sure we have public keys available
-SDC_KEYS_VOL ?= -v $(DOCKER_CERT_PATH):$(DOCKER_CERT_PATH)
-keys: $(DOCKER_CERT_PATH)/key.pub
 
 run-local:
 	cd ../examples/compose && TAG=$(tag) docker-compose up -d
+
+# Make keys available when running tests from a container
+SDC_KEYS_VOL ?= -v $(DOCKER_CERT_PATH):$(DOCKER_CERT_PATH) -v $(HOME)/.ssh:/root.ssh
 
 ## Run the integration test runner. Runs locally but targets Triton.
 test:
