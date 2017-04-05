@@ -17,7 +17,7 @@ import uuid
 from testcases import AutopilotPatternTest, WaitTimeoutError, \
      dump_environment_to_file
 import requests
-
+from IPy import IP
 
 
 class NginxStackTest(AutopilotPatternTest):
@@ -52,17 +52,23 @@ class NginxStackTest(AutopilotPatternTest):
         self.instrument(self.wait_for_containers,
                         {'backend': 2, "nginx": 1, "consul": 1}, timeout=300)
         self.instrument(self.wait_for_service, 'backend', count=2, timeout=60)
-        self.compare_backends()
 
-        # netsplit a backend
+        # get our expected IP addresses
+        _, backend1_ip = self.get_ips('backend_1')
+        _, backend2_ip = self.get_ips('backend_2')
+
+        # make sure nginx has both of them
+        self.compare_backends([backend1_ip, backend2_ip])
+
+        # netsplit a backend and make sure nginx converges
         self.docker_exec('backend_2', 'ifconfig eth0 down')
         self.instrument(self.wait_for_service, 'backend', count=1)
-        self.compare_backends()
+        self.compare_backends([backend1_ip])
 
-        # heal netsplit
+        # heal netsplit and make sure nginx converges
         self.docker_exec('backend_2', 'ifconfig eth0 up')
         self.instrument(self.wait_for_service, 'backend', count=2, timeout=60)
-        self.compare_backends()
+        self.compare_backends([backend1_ip, backend2_ip])
 
     def wait_for_containers(self, expected={}, timeout=30):
         """
@@ -100,28 +106,35 @@ class NginxStackTest(AutopilotPatternTest):
                 if r.status_code == 200:
                     break
             except requests.exceptions.ConnectionError:
-                pass
-            timeout -= 1
-            time.sleep(1)
+                timeout -= 1
+                time.sleep(1)
         else:
             self.fail("nginx has not become reachable at {}"
                       .format(self.nginx_cns))
 
+    def get_possible_backend_ips(self, timeout=60):
+        _, ips = self.get_service_ips('backend')
+        ips.sort()
+        return ips
 
-    def compare_backends(self):
-        expected = self.get_service_instances_from_consul('backend').sort()
-        actual = list(set([self.query_for_backend() for _ in range(10)])).sort()
-        self.assertEqual(expected, actual,
-                         'Expected {} but got {} for Nginx backends'
-                         .format(expected, actual))
+    def compare_backends(self, expected, timeout=60):
+        expected.sort()
+        patt = 'server \d{2,3}\.\d{2,3}\.\d{2,3}\.\d{2,3}\:3001;'
+        while timeout > 0:
+            conf = self.docker_exec('nginx_1',
+                                    'cat /etc/nginx/conf.d/site.conf')
+            actual = re.findall(patt, conf)
+            actual = [IP(a.replace('server', '').replace(':3001;', '').strip())
+                      for a in actual]
+            actual.sort()
+            if actual == expected:
+                break
 
-    def query_for_backend(self):
-        r = requests.get('http://{}'.format(self.nginx_cns)) # TODO: SSL
-        if r.status_code != 200:
-            self.fail('Expected 200 OK but got {}'.format(r.status_code))
-        return r.text.strip('HelloWorld\n ')
-
-
+            timeout -= 1
+            time.sleep(1)
+        else:
+            self.fail("expected {} but got {} for Nginx backends"
+                      .format(expected, actual))
 
 
 if __name__ == "__main__":
