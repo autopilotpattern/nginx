@@ -119,7 +119,7 @@ class NginxStackTest(AutopilotPatternTest):
 
     def compare_backends(self, expected, timeout=60):
         expected.sort()
-        patt = 'server \d{2,3}\.\d{2,3}\.\d{2,3}\.\d{2,3}\:3001;'
+        patt = 'server \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\:3001;'
         while timeout > 0:
             conf = self.docker_exec('nginx_1',
                                     'cat /etc/nginx/conf.d/site.conf')
