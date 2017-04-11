@@ -128,7 +128,7 @@ case "$1" in
         acquireLeader
         ;;
     watch)
-        /usr/local/bin/consul-template -config /etc/acme/watch.hcl -consul $CONSUL_HOST:8500
+        /usr/local/bin/consul-template -config /etc/acme/watch.hcl -consul-addr $CONSUL_HOST:8500
         ;;
     init)
         if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem ]; then
