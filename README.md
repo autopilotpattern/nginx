@@ -42,3 +42,47 @@ nginx:
     labels:
         - triton.cns.services=nginx
 ```
+
+#### Multiple nginx, same consul cluster
+
+To run more than one Nginx balancer against the same consul cluster you'll need
+to namespace them using the `SERVICE_NAME` environment variable. (Default: `nginx`)
+
+Example:
+
+```yaml
+nginx_1:
+    image: autopilotpattern/nginx
+    restart: always
+    mem_limit: 512m
+    env_file: _env
+    environment:
+        - BACKEND=example
+        - CONSUL_AGENT=1
+        - ACME_ENV=staging
+        - ACME_DOMAIN=example.com
+        - SERVICE_NAME=nginx_1
+    ports:
+        - 80
+        - 443
+        - 9090
+    labels:
+        - triton.cns.services=nginx-1
+nginx_2:
+    image: autopilotpattern/nginx
+    restart: always
+    mem_limit: 512m
+    env_file: _env
+    environment:
+        - BACKEND=example
+        - CONSUL_AGENT=1
+        - ACME_ENV=staging
+        - ACME_DOMAIN=dev.example.com
+        - SERVICE_NAME=nginx_2
+    ports:
+        - 80
+        - 443
+        - 9090
+    labels:
+        - triton.cns.services=nginx-2
+```
