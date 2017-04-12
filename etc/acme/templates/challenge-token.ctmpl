@@ -1,4 +1,5 @@
 {{ $service_name := env "SERVICE_NAME" }}
+{{ $service_name := or $service_name "nginx" }}
 {{if key (print $service_name "/acme/token-filename")}}{{key (print $service_name "/acme/token-filename")}}{{end}}
 {{if key (print $service_name "/acme/token-value")}}{{key (print $service_name "/acme/token-value")}}{{end}}
 {{if key (print $service_name "/acme/last-token-filename")}}{{key (print $service_name "/acme/last-token-filename")}}{{end}}

@@ -1,2 +1,3 @@
 {{ $service_name := env "SERVICE_NAME" }}
+{{ $service_name := or $service_name "nginx" }}
 {{if key (print $service_name "/acme/key")}}{{key (print $service_name "/acme/key")}}{{end}}
