@@ -1,5 +1,5 @@
 # A minimal Nginx container including ContainerPilot
-FROM nginx:1.11
+FROM nginx:1.13
 
 # Add some stuff via apt-get
 RUN apt-get update \
