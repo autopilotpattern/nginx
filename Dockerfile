@@ -5,14 +5,15 @@ FROM nginx:1.13
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         bc \
+        ca-certificates \
         curl \
         unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Consul
 # Releases at https://releases.hashicorp.com/consul
-RUN export CONSUL_VERSION=0.7.3 \
-    && export CONSUL_CHECKSUM=901a3796b645c3ce3853d5160080217a10ad8d9bd8356d0b73fcd6bc078b7f82 \
+RUN export CONSUL_VERSION=0.7.5 \
+    && export CONSUL_CHECKSUM=40ce7175535551882ecdff21fdd276cef6eaab96be8a8260e0599fadb6f1f5b8 \
     && curl --retry 7 --fail -vo /tmp/consul.zip "https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip" \
     && echo "${CONSUL_CHECKSUM}  /tmp/consul.zip" | sha256sum -c \
     && unzip /tmp/consul -d /usr/local/bin \
@@ -25,18 +26,19 @@ RUN mkdir -p /etc/consul \
 
 # Install Consul template
 # Releases at https://releases.hashicorp.com/consul-template/
-RUN export CONSUL_TEMPLATE_VERSION=0.18.0 \
-    && export CONSUL_TEMPLATE_CHECKSUM=f7adf1f879389e7f4e881d63ef3b84bce5bc6e073eb7a64940785d32c997bc4b \
+RUN export CONSUL_TEMPLATE_VERSION=0.18.3 \
+    && export CONSUL_TEMPLATE_CHECKSUM=caf6018d7489d97d6cc2a1ac5f1cbd574c6db4cd61ed04b22b8db7b4bde64542 \
     && curl --retry 7 --fail -Lso /tmp/consul-template.zip "https://releases.hashicorp.com/consul-template/${CONSUL_TEMPLATE_VERSION}/consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip" \
     && echo "${CONSUL_TEMPLATE_CHECKSUM}  /tmp/consul-template.zip" | sha256sum -c \
     && unzip /tmp/consul-template.zip -d /usr/local/bin \
     && rm /tmp/consul-template.zip
 
 # Add Containerpilot and set its configuration
-ENV CONTAINERPILOT_VER 2.7.2
+# Releases at https://github.com/joyent/containerpilot/releases
+ENV CONTAINERPILOT_VER 2.7.3
 ENV CONTAINERPILOT file:///etc/containerpilot.json
 
-RUN export CONTAINERPILOT_CHECKSUM=e886899467ced6d7c76027d58c7f7554c2fb2bcc \
+RUN export CONTAINERPILOT_CHECKSUM=2511fdfed9c6826481a9048e8d34158e1d7728bf \
     && curl -Lso /tmp/containerpilot.tar.gz \
          "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
     && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
