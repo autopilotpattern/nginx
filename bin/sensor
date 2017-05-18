@@ -7,18 +7,19 @@ help() {
     echo 'http://nginx.org/en/docs/http/ngx_http_stub_status_module.html'
 }
 
-# Cummulative number of dropped connections
+# Cumulative number of dropped connections
 unhandled() {
-    local accepts=$(curl -s --fail localhost/nginx-health | awk 'FNR == 3 {print $1}')
-    local handled=$(curl -s --fail localhost/nginx-health | awk 'FNR == 3 {print $2}')
+    local scraped=$(curl -s --fail localhost/nginx-health)
+    local accepts=$(echo "${scraped}" | awk 'FNR == 3 {print $1}')
+    local handled=$(echo "${scraped}" | awk 'FNR == 3 {print $2}')
     echo $(expr ${accepts} - ${handled})
 }
 
 # ratio of connections-in-use to available workers
 connections_load() {
     local scraped=$(curl -s --fail localhost/nginx-health)
-    local active=$(echo ${scraped} | awk '/Active connections/{print $3}')
-    local waiting=$(echo ${scraped} | awk '/Reading/{print $6}')
+    local active=$(echo "${scraped}" | awk '/Active connections/{print $3}')
+    local waiting=$(echo "${scraped}" | awk '/Reading/{print $6}')
     local workers=$(echo $(cat /etc/nginx/nginx.conf | perl -n -e'/worker_connections *(\d+)/ && print $1')
 )
     echo $(echo "scale=4; (${active} - ${waiting}) / ${workers}" | bc)
