@@ -16,8 +16,6 @@ example := $(namespace)/nginx-example
 backend := $(namespace)/nginx-backend
 testImage := $(namespace)/nginx-testrunner
 
-dockerLocal := DOCKER_HOST= DOCKER_TLS_VERIFY= DOCKER_CERT_PATH= docker
-
 ## Display this help message
 help:
 	@awk '/^##.*$$/,/[a-zA-Z_-]+:/' $(MAKEFILE_LIST) | awk '!(NR%2){print $$0p}{p=$$0}' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' | sort
@@ -26,37 +24,37 @@ help:
 # ------------------------------------------------
 # Container builds
 
-## Builds the application container image locally
+## Builds the application container image
 build: test-runner
-	cd .. && $(dockerLocal) build -t=$(image):$(tag) .
+	cd .. && docker build -t=$(image):$(tag) .
 
-## Builds the application example images locally
+## Builds the application example images
 examples: build
 	cd .. && sed 's/latest/$(tag)/' examples/Dockerfile > examples/Examplefile
-	cd .. && $(dockerLocal) build -f examples/Examplefile -t=$(example):$(tag) .
-	cd .. && $(dockerLocal) build -f examples/backend/Dockerfile -t=$(backend):$(tag) .
+	cd .. && docker build -f examples/Examplefile -t=$(example):$(tag) .
+	cd .. && docker build -f examples/backend/Dockerfile -t=$(backend):$(tag) .
 
 ## Build the test running container
 test-runner:
-	cd .. && $(dockerLocal) build -f test/Dockerfile -t=$(testImage):$(tag) .
+	cd .. && docker build -f test/Dockerfile -t=$(testImage):$(tag) .
 
 ## Push the current application container images to the Docker Hub
 push:
-	$(dockerLocal) push $(image):$(tag)
+	docker push $(image):$(tag)
 
 ## Push the current example application container images to the Docker Hub
 push-examples:
-	$(dockerLocal) push $(example):$(tag)
-	$(dockerLocal) push $(backend):$(tag)
-	$(dockerLocal) push $(testImage):$(tag)
+	docker push $(example):$(tag)
+	docker push $(backend):$(tag)
+	docker push $(testImage):$(tag)
 
 ## Tag the current images as 'latest' and push them to the Docker Hub
 ship:
-	$(dockerLocal) tag $(image):$(tag) $(image):latest
-	$(dockerLocal) tag $(testImage):$(tag) $(testImage):latest
-	$(dockerLocal) tag $(image):$(tag) $(image):latest
-	$(dockerLocal) push $(image):$(tag)
-	$(dockerLocal) push $(image):latest
+	docker tag $(image):$(tag) $(image):latest
+	docker tag $(testImage):$(tag) $(testImage):latest
+	docker tag $(image):$(tag) $(image):latest
+	docker push $(image):$(tag)
+	docker push $(image):latest
 
 
 
@@ -73,9 +71,13 @@ pull-examples:
 	docker pull $(backend):$(tag)
 	docker pull $(testImage):$(tag)
 
-
+## Run the example via Docker Compose against the local Docker environment
 run-local:
 	cd ../examples/compose && TAG=$(tag) docker-compose up -d
+
+## Run the example via triton-compose on Joyent's Triton
+run-triton:
+	cd ../examples/triton && TAG=$(tag) triton-compose up -d
 
 # Make keys available when running tests from a container
 SDC_KEYS_VOL ?= -v $(DOCKER_CERT_PATH):$(DOCKER_CERT_PATH) -v $(HOME)/.ssh:/root.ssh
@@ -84,7 +86,7 @@ SDC_KEYS_VOL ?= -v $(DOCKER_CERT_PATH):$(DOCKER_CERT_PATH) -v $(HOME)/.ssh:/root
 test:
 	$(call check_var, TRITON_ACCOUNT TRITON_DC, \
 		required to run integration tests on Triton.)
-	$(dockerLocal) run --rm \
+	docker run --rm \
 		-e TAG=$(tag) \
 		-e COMPOSE_HTTP_TIMEOUT=300 \
 		-e DOCKER_HOST=$(DOCKER_HOST) \
