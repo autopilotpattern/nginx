@@ -7,7 +7,7 @@ MAKEFLAGS += --warn-undefined-variables
 # we get these from CI environment if available, otherwise from git
 GIT_COMMIT ?= $(shell git rev-parse --short HEAD)
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
-WORKSPACE ?= $(shell pwd)/..
+WORKSPACE ?= $(shell pwd)
 
 namespace ?= autopilotpattern
 tag := branch-$(shell basename $(GIT_BRANCH))
@@ -25,25 +25,25 @@ help:
 # Container builds
 
 ## Builds the application container image
-build: test-runner
-	cd .. && docker build -t=$(image):$(tag) .
+build:
+	docker build -t=$(image):$(tag) .
 
 ## Builds the application example images
-examples: build
-	cd .. && sed 's/latest/$(tag)/' examples/Dockerfile > examples/Examplefile
-	cd .. && docker build -f examples/Examplefile -t=$(example):$(tag) .
-	cd .. && docker build -f examples/backend/Dockerfile -t=$(backend):$(tag) .
+build/examples: build
+	sed 's/latest/$(tag)/' examples/Dockerfile > examples/Examplefile
+	cd ./examples && docker build -f Examplefile -t=$(example):$(tag) .
+	cd ./examples/backend && docker build -t=$(backend):$(tag) .
 
 ## Build the test running container
-test-runner:
-	cd .. && docker build -f test/Dockerfile -t=$(testImage):$(tag) .
+build/tester:
+	docker build -f test/Dockerfile -t=$(testImage):$(tag) .
 
 ## Push the current application container images to the Docker Hub
 push:
 	docker push $(image):$(tag)
 
 ## Push the current example application container images to the Docker Hub
-push-examples:
+push/examples:
 	docker push $(example):$(tag)
 	docker push $(backend):$(tag)
 	docker push $(testImage):$(tag)
@@ -66,18 +66,18 @@ pull:
 	docker pull $(image):$(tag)
 
 ## Pull the test target images from the docker Hub
-pull-examples:
+pull/examples:
 	docker pull $(example):$(tag)
 	docker pull $(backend):$(tag)
 	docker pull $(testImage):$(tag)
 
 ## Run the example via Docker Compose against the local Docker environment
-run-local:
-	cd ../examples/compose && TAG=$(tag) docker-compose up -d
+run/compose:
+	cd ./examples/compose && TAG=$(tag) docker-compose up -d
 
 ## Run the example via triton-compose on Joyent's Triton
-run-triton:
-	cd ../examples/triton && TAG=$(tag) triton-compose up -d
+run/triton:
+	cd ./examples/triton && TAG=$(tag) triton-compose up -d
 
 # Make keys available when running tests from a container
 SDC_KEYS_VOL ?= -v $(DOCKER_CERT_PATH):$(DOCKER_CERT_PATH) -v $(HOME)/.ssh:/root.ssh

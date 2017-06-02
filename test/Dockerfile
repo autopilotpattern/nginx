@@ -1,3 +1,7 @@
+# NOTE: this Dockerfile needs to be run from one-level up so that
+# we get the examples docker-compose.yml files. Use 'make test-runner'
+# in the makefile at the root of this repo and everything will work
+
 FROM alpine:3.4
 
 RUN apk update \

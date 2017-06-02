@@ -13,12 +13,12 @@ RUN export CP_SHA1=198d96c8d7bfafb1ab6df96653c29701510b833c \
     && rm /tmp/containerpilot.tar.gz
 
 # COPY ContainerPilot configuration
-COPY examples/backend/containerpilot.json /etc/containerpilot.json
+COPY containerpilot.json /etc/containerpilot.json
 ENV CONTAINERPILOT=file:///etc/containerpilot.json
 
 
 # Install our application
-COPY examples/backend/index.js /opt/hello/
+COPY index.js /opt/hello/
 
 EXPOSE 3001
 CMD ["/bin/containerpilot", "node", "/opt/hello/index.js"]
