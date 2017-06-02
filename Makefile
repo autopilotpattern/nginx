@@ -51,7 +51,6 @@ push/examples:
 ## Tag the current images as 'latest' and push them to the Docker Hub
 ship:
 	docker tag $(image):$(tag) $(image):latest
-	docker tag $(testImage):$(tag) $(testImage):latest
 	docker tag $(image):$(tag) $(image):latest
 	docker push $(image):$(tag)
 	docker push $(image):latest
@@ -69,7 +68,6 @@ pull:
 pull/examples:
 	docker pull $(example):$(tag)
 	docker pull $(backend):$(tag)
-	docker pull $(testImage):$(tag)
 
 ## Run the example via Docker Compose against the local Docker environment
 run/compose:
@@ -79,24 +77,17 @@ run/compose:
 run/triton:
 	cd ./examples/triton && TAG=$(tag) triton-compose up -d
 
-# Make keys available when running tests from a container
-SDC_KEYS_VOL ?= -v $(DOCKER_CERT_PATH):$(DOCKER_CERT_PATH) -v $(HOME)/.ssh:/root.ssh
-
 ## Run the integration test runner. Runs locally but targets Triton.
 test:
-	$(call check_var, TRITON_ACCOUNT TRITON_DC, \
+	$(call check_var, TRITON_PROFILE, \
 		required to run integration tests on Triton.)
 	docker run --rm \
 		-e TAG=$(tag) \
-		-e COMPOSE_HTTP_TIMEOUT=300 \
-		-e DOCKER_HOST=$(DOCKER_HOST) \
-		-e DOCKER_TLS_VERIFY=1 \
-		-e DOCKER_CERT_PATH=$(DOCKER_CERT_PATH) \
-		-e TRITON_ACCOUNT=$(TRITON_ACCOUNT) \
-		-e TRITON_DC=$(TRITON_DC) \
-		$(SDC_KEYS_VOL) -w /src \
+		-e TRITON_PROFILE=$(TRITON_PROFILE) \
+		-v ~/.ssh:/root/.ssh:ro \
+		-v ~/.triton/profiles.d:/root/.triton/profiles.d:ro \
+		-w /src \
 		$(testImage):$(tag) python3 tests.py
-
 
 ## Print environment for build debugging
 debug:

@@ -31,11 +31,13 @@ class NginxStackTest(AutopilotPatternTest):
         as part of a CNS entry for Consul. We use these values to construct
         a CNS entry for this test rig as well.
         """
-        account = os.environ['TRITON_ACCOUNT']
-        dc = os.environ['TRITON_DC']
-        self.consul_cns = 'consul.svc.{}.{}.triton.zone'.format(account, dc)
-        self.nginx_cns = 'nginx-frontend.svc.{}.{}.triton.zone'.format(account, dc)
-        os.environ['CONSUL'] = self.consul_cns
+        try:
+            suffix = os.environ['TRITON_CNS_PRIVATE_SEARCH_DOMAIN']
+            self.consul_cns = 'nginx-consul.svc.{}'.format(suffix)
+            self.nginx_cns = 'nginx-frontend.svc.{}'.format(suffix)
+            os.environ['CONSUL'] = self.consul_cns
+        except KeyError as ex:
+            self.fail(ex)
 
     def test_scaleup_and_down(self):
 

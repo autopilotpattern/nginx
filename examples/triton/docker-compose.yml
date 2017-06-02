@@ -9,7 +9,7 @@ services:
       - CONSUL_AGENT=1
       - ACME_ENV=staging
       - ACME_DOMAIN
-      - CONSUL=nginx-consul.svc.${TRITON_ACCOUNT}.${TRITON_DC}.cns.joyent.com
+      - CONSUL=nginx-consul.svc.${TRITON_CNS_PRIVATE_SEARCH_DOMAIN}
     ports:
       - 80
       - 443
@@ -24,7 +24,7 @@ services:
     mem_limit: 128m
     restart: always
     environment:
-      - CONSUL=nginx-consul.svc.${TRITON_ACCOUNT}.${TRITON_DC}.cns.joyent.com
+      - CONSUL=nginx-consul.svc.${TRITON_CNS_PRIVATE_SEARCH_DOMAIN}
     ports:
       - 3001
     labels:
