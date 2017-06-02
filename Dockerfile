@@ -34,11 +34,10 @@ RUN export CONSUL_TEMPLATE_VERSION=0.18.3 \
     && rm /tmp/consul-template.zip
 
 # Add Containerpilot and set its configuration
-# Releases at https://github.com/joyent/containerpilot/releases
-ENV CONTAINERPILOT_VER 2.7.3
-ENV CONTAINERPILOT file:///etc/containerpilot.json
+ENV CONTAINERPILOT_VER 3.0.0-RC1
+ENV CONTAINERPILOT /etc/containerpilot.json5
 
-RUN export CONTAINERPILOT_CHECKSUM=2511fdfed9c6826481a9048e8d34158e1d7728bf \
+RUN export CONTAINERPILOT_CHECKSUM=f67929d1c8567d31772085fc252338091a5f795c \
     && curl -Lso /tmp/containerpilot.tar.gz \
          "https://github.com/joyent/containerpilot/releases/download/${CONTAINERPILOT_VER}/containerpilot-${CONTAINERPILOT_VER}.tar.gz" \
     && echo "${CONTAINERPILOT_CHECKSUM}  /tmp/containerpilot.tar.gz" | sha1sum -c \
@@ -60,7 +59,7 @@ RUN export JQ_VERSION=1.5 \
 # Add our configuration files and scripts
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY etc/acme /etc/acme
-COPY etc/containerpilot.json /etc/
+COPY etc/containerpilot.json5 /etc/
 COPY etc/nginx /etc/nginx/templates
 COPY bin /usr/local/bin
 
@@ -73,7 +72,4 @@ RUN mkdir -p /var/www/acme/challenge
 # Consul session data written here
 RUN mkdir -p /var/consul
 
-CMD [ "/usr/local/bin/containerpilot", \
-    "nginx", \
-        "-g", \
-        "daemon off;"]
+CMD ["/usr/local/bin/containerpilot"]
