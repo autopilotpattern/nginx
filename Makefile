@@ -77,6 +77,11 @@ run/compose:
 run/triton:
 	cd ./examples/triton && TAG=$(tag) triton-compose up -d
 
+
+# TODO: name this better
+test-no-docker:
+	./test/tests.sh
+
 ## Run the integration test runner. Runs locally but targets Triton.
 test:
 	$(call check_var, TRITON_PROFILE, \
@@ -87,13 +92,14 @@ test:
 		-v ~/.ssh:/root/.ssh:ro \
 		-v ~/.triton/profiles.d:/root/.triton/profiles.d:ro \
 		-w /src \
-		$(testImage):$(tag) python3 tests.py
+		$(testImage):$(tag) /src/tests.sh
 
 ## Print environment for build debugging
 debug:
 	@echo WORKSPACE=$(WORKSPACE)
 	@echo GIT_COMMIT=$(GIT_COMMIT)
 	@echo GIT_BRANCH=$(GIT_BRANCH)
+	@echo TRITON_PROFILE=$(TRITON_PROFILE)
 	@echo namespace=$(namespace)
 	@echo tag=$(tag)
 	@echo image=$(image)
