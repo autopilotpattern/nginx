@@ -5,7 +5,7 @@
 FROM alpine:3.5
 
 RUN apk update \
-    && apk add nodejs python3 openssl bash curl
+    && apk add nodejs python3 openssl bash curl docker
 RUN npm install -g triton json
 
 # the Compose package in the public releases doesn't work on Alpine

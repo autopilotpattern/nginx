@@ -71,11 +71,11 @@ pull/examples:
 
 ## Run the example via Docker Compose against the local Docker environment
 run/compose:
-	cd ./examples/compose && TAG=$(tag) docker-compose up -d
+	cd ./examples/compose && TAG=$(tag) docker-compose -p nginx up -d
 
 ## Run the example via triton-compose on Joyent's Triton
 run/triton:
-	cd ./examples/triton && TAG=$(tag) triton-compose up -d
+	cd ./examples/triton && TAG=$(tag) triton-compose -p nginx up -d
 
 ## Run all integration tests
 test: test/compose test/triton
@@ -85,14 +85,10 @@ test/compose:
 	docker run --rm \
 		-e TAG=$(tag) \
 		-e GIT_BRANCH=$(GIT_BRANCH) \
+		--network=bridge \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-w /src \
 		$(testImage):$(tag) /src/compose.sh
-
-# runs the integration test above but entirely within your local
-# development environment rather than the clean test rig
-test/compose/dev:
-	./test/compose.sh
 
 ## Run the integration test runner. Runs locally but targets Triton.
 test/triton:
