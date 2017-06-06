@@ -80,8 +80,7 @@ wait_for_service() {
         got=$(curl -s "http://${consul_ip}:8500/v1/health/service/${service}?passing" \
                      | json -a Service.Address | wc -l | tr -d ' ')
         if [ "$got" -eq "$count" ]; then
-            echo
-            "$service registered in <= $i seconds"
+            echo "$service registered in <= $i seconds"
             return
         fi
         i=$((i+1))
