@@ -44,7 +44,7 @@ wait_for_containers() {
     local container count timeout i got
     container="$1"
     count="$2"
-    timeout="${3:-30}" # default 30sec
+    timeout="${3:-60}" # default 60sec
     i=0
     echo -n "waiting for $container to be Up "
     while [ $i -lt "$timeout" ]; do
