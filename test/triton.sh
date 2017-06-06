@@ -151,6 +151,13 @@ profile() {
 run() {
     echo
     echo '------------------------------------------------'
+    echo 'cleaning up previous test run'
+    echo '------------------------------------------------'
+    triton-compose -p "$project" -f "$manifest" stop
+    triton-compose -p "$project" -f "$manifest" rm -f
+
+    echo
+    echo '------------------------------------------------'
     echo 'standing up initial test targets'
     echo '------------------------------------------------'
     echo
