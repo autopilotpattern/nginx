@@ -9,7 +9,7 @@ services:
       - CONSUL_AGENT=1
       - ACME_ENV=staging
       - ACME_DOMAIN
-      - CONSUL=nginx-consul.svc.${TRITON_CNS_SEARCH_DOMAIN_PRIVATE}
+      - CONSUL=nc.svc.${TRITON_CNS_SEARCH_DOMAIN_PRIVATE}
     ports:
       - 80
       - 443
@@ -24,7 +24,7 @@ services:
     mem_limit: 128m
     restart: always
     environment:
-      - CONSUL=nginx-consul.svc.${TRITON_CNS_SEARCH_DOMAIN_PRIVATE}
+      - CONSUL=nc.svc.${TRITON_CNS_SEARCH_DOMAIN_PRIVATE}
     ports:
       - 3001
     labels:
