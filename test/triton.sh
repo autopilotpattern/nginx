@@ -12,8 +12,14 @@ manifest="$COMPOSE_FILE"
 fail() {
     echo
     echo '------------------------------------------------'
+    echo 'FAILED: dumping logs'
+    echo '------------------------------------------------'
+    triton-compose -p "$project" -f "$manifest" ps
+    triton-compose -p "$project" -f "$manifest" logs
+    echo '------------------------------------------------'
     echo 'FAILED'
     echo "$1"
+    echo '------------------------------------------------'
     exit 1
 }
 
