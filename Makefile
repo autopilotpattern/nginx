@@ -77,13 +77,23 @@ run/compose:
 run/triton:
 	cd ./examples/triton && TAG=$(tag) triton-compose up -d
 
+## Run all integration tests
+test: test/compose test/triton
 
-# TODO: name this better
-test-no-docker:
-	./test/tests.sh
+## Run the integration test runner against Compose locally.
+test/compose:
+	docker run --rm \
+		-e TAG=$(tag) \
+		-w /src \
+		$(testImage):$(tag) /src/compose.sh
+
+# runs the integration test above but entirely within your local
+# development environment rather than the clean test rig
+test/compose/dev:
+	./test/compose.sh
 
 ## Run the integration test runner. Runs locally but targets Triton.
-test:
+test/triton:
 	$(call check_var, TRITON_PROFILE, \
 		required to run integration tests on Triton.)
 	docker run --rm \
@@ -92,7 +102,12 @@ test:
 		-v ~/.ssh:/root/.ssh:ro \
 		-v ~/.triton/profiles.d:/root/.triton/profiles.d:ro \
 		-w /src \
-		$(testImage):$(tag) /src/tests.sh
+		$(testImage):$(tag) /src/triton.sh
+
+# runs the integration test above but entirely within your local
+# development environment rather than the clean test rig
+test/triton/dev:
+	./test/triton.sh
 
 ## Print environment for build debugging
 debug:
