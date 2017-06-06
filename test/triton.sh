@@ -46,16 +46,15 @@ wait_for_containers() {
     count="$2"
     timeout="${3:-60}" # default 60sec
     i=0
-    echo -n "waiting for $container to be Up "
+    echo "waiting for $container to be Up..."
     while [ $i -lt "$timeout" ]; do
         got=$(triton-compose -p "$project" -f "$manifest" ps "$container" | grep -c "Up")
         if [ "$got" -eq "$count" ]; then
-            echo
+            echo "$container reported Up in <= $i seconds"
             return
         fi
         i=$((i+1))
         sleep 1
-        echo -n '.'
     done
     fail "waited for container $container for $timeout seconds but it was not marked 'Up'"
 }
@@ -69,18 +68,18 @@ wait_for_service() {
     count="$2"
     timeout="${3:-30}" # default 30sec
     i=0
-    echo -n "waiting for $count instances of $service to be registered with Consul "
+    echo "waiting for $count instances of $service to be registered with Consul..."
     consul_ip=$(triton ip "${project}_consul_1")
     while [ $i -lt "$timeout" ]; do
         got=$(curl -s "http://${consul_ip}:8500/v1/health/service/${service}?passing" \
                      | json -a Service.Address | wc -l | tr -d ' ')
         if [ "$got" -eq "$count" ]; then
             echo
+            "$service registered in <= $i seconds"
             return
         fi
         i=$((i+1))
         sleep 1
-        echo -n '.'
     done
     fail "waited for service $service for $timeout seconds but it was not registed with Consul"
 }
@@ -92,7 +91,7 @@ check_nginx_upstream_matches() {
     count="$2"
     timeout="${3:-30}" # default 30sec
     i=0
-    echo -n "waiting for $count instances of $service to be in Nginx upstream "
+    echo "waiting for $count instances of $service to be in Nginx upstream..."
     consul_ip=$(triton ip "${project}_consul_1")
     while [ $i -lt "$timeout" ]; do
         ips=$(curl -s "http://${consul_ip}:8500/v1/health/service/${service}?passing" \
@@ -103,13 +102,12 @@ check_nginx_upstream_matches() {
                                 cat /etc/nginx/conf.d/site.conf \
                          | grep 3001 | tr -d 'serv ' | cut -d':' -f1 | sort)
             if [[ "$ips" == "$got" ]]; then
-                echo
+                echo "settled in <= $i seconds"
                 return
             fi
         fi
         i=$((i+1))
         sleep 1
-        echo -n '.'
     done
     echo
     fail "waited for service $service for $timeout seconds but Nginx did not register upstreams. expected: ${ips} but got: ${got}"
