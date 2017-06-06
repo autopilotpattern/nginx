@@ -84,6 +84,8 @@ test: test/compose test/triton
 test/compose:
 	docker run --rm \
 		-e TAG=$(tag) \
+		-e GIT_BRANCH=$(GIT_BRANCH) \
+		-v /var/run/docker.sock:/var/run/docker.sock \
 		-w /src \
 		$(testImage):$(tag) /src/compose.sh
 
@@ -99,6 +101,7 @@ test/triton:
 	docker run --rm \
 		-e TAG=$(tag) \
 		-e TRITON_PROFILE=$(TRITON_PROFILE) \
+		-e GIT_BRANCH=$(GIT_BRANCH) \
 		-v ~/.ssh:/root/.ssh:ro \
 		-v ~/.triton/profiles.d:/root/.triton/profiles.d:ro \
 		-w /src \
