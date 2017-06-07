@@ -7,7 +7,7 @@ MAKEFLAGS += --warn-undefined-variables
 # we get these from CI environment if available, otherwise from git
 GIT_COMMIT ?= $(shell git rev-parse --short HEAD)
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
-WORKSPACE ?= $(shell pwd)/..
+WORKSPACE ?= $(shell pwd)
 
 namespace ?= autopilotpattern
 tag := branch-$(shell basename $(GIT_BRANCH))
@@ -15,8 +15,6 @@ image := $(namespace)/nginx
 example := $(namespace)/nginx-example
 backend := $(namespace)/nginx-backend
 testImage := $(namespace)/nginx-testrunner
-
-dockerLocal := DOCKER_HOST= DOCKER_TLS_VERIFY= DOCKER_CERT_PATH= docker
 
 ## Display this help message
 help:
@@ -26,37 +24,36 @@ help:
 # ------------------------------------------------
 # Container builds
 
-## Builds the application container image locally
-build: test-runner
-	cd .. && $(dockerLocal) build -t=$(image):$(tag) .
+## Builds the application container image
+build:
+	docker build -t=$(image):$(tag) .
 
-## Builds the application example images locally
-examples: build
-	cd .. && sed 's/latest/$(tag)/' examples/Dockerfile > examples/Examplefile
-	cd .. && $(dockerLocal) build -f examples/Examplefile -t=$(example):$(tag) .
-	cd .. && $(dockerLocal) build -f examples/backend/Dockerfile -t=$(backend):$(tag) .
+## Builds the application example images
+build/examples: build
+	sed 's/latest/$(tag)/' examples/Dockerfile > examples/Examplefile
+	cd ./examples && docker build -f Examplefile -t=$(example):$(tag) .
+	cd ./examples/backend && docker build -t=$(backend):$(tag) .
 
 ## Build the test running container
-test-runner:
-	cd .. && $(dockerLocal) build -f test/Dockerfile -t=$(testImage):$(tag) .
+build/tester:
+	docker build -f test/Dockerfile -t=$(testImage):$(tag) .
 
 ## Push the current application container images to the Docker Hub
 push:
-	$(dockerLocal) push $(image):$(tag)
+	docker push $(image):$(tag)
 
 ## Push the current example application container images to the Docker Hub
-push-examples:
-	$(dockerLocal) push $(example):$(tag)
-	$(dockerLocal) push $(backend):$(tag)
-	$(dockerLocal) push $(testImage):$(tag)
+push/examples:
+	docker push $(example):$(tag)
+	docker push $(backend):$(tag)
+	docker push $(testImage):$(tag)
 
 ## Tag the current images as 'latest' and push them to the Docker Hub
 ship:
-	$(dockerLocal) tag $(image):$(tag) $(image):latest
-	$(dockerLocal) tag $(testImage):$(tag) $(testImage):latest
-	$(dockerLocal) tag $(image):$(tag) $(image):latest
-	$(dockerLocal) push $(image):$(tag)
-	$(dockerLocal) push $(image):latest
+	docker tag $(image):$(tag) $(image):latest
+	docker tag $(image):$(tag) $(image):latest
+	docker push $(image):$(tag)
+	docker push $(image):latest
 
 
 
@@ -68,39 +65,55 @@ pull:
 	docker pull $(image):$(tag)
 
 ## Pull the test target images from the docker Hub
-pull-examples:
+pull/examples:
 	docker pull $(example):$(tag)
 	docker pull $(backend):$(tag)
-	docker pull $(testImage):$(tag)
 
+## Run the example via Docker Compose against the local Docker environment
+run/compose:
+	cd ./examples/compose && TAG=$(tag) docker-compose -p nginx up -d
 
-run-local:
-	cd ../examples/compose && TAG=$(tag) docker-compose up -d
+## Run the example via triton-compose on Joyent's Triton
+run/triton:
+	cd ./examples/triton && TAG=$(tag) triton-compose -p nginx up -d
 
-# Make keys available when running tests from a container
-SDC_KEYS_VOL ?= -v $(DOCKER_CERT_PATH):$(DOCKER_CERT_PATH) -v $(HOME)/.ssh:/root.ssh
+## Run all integration tests
+test: test/compose test/triton
+
+## Run the integration test runner against Compose locally.
+test/compose:
+	docker run --rm \
+		-e TAG=$(tag) \
+		-e GIT_BRANCH=$(GIT_BRANCH) \
+		--network=bridge \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-w /src \
+		$(testImage):$(tag) /src/compose.sh
 
 ## Run the integration test runner. Runs locally but targets Triton.
-test:
-	$(call check_var, TRITON_ACCOUNT TRITON_DC, \
+test/triton:
+	$(call check_var, TRITON_PROFILE, \
 		required to run integration tests on Triton.)
-	$(dockerLocal) run --rm \
+	docker run --rm \
 		-e TAG=$(tag) \
-		-e COMPOSE_HTTP_TIMEOUT=300 \
-		-e DOCKER_HOST=$(DOCKER_HOST) \
-		-e DOCKER_TLS_VERIFY=1 \
-		-e DOCKER_CERT_PATH=$(DOCKER_CERT_PATH) \
-		-e TRITON_ACCOUNT=$(TRITON_ACCOUNT) \
-		-e TRITON_DC=$(TRITON_DC) \
-		$(SDC_KEYS_VOL) -w /src \
-		$(testImage):$(tag) python3 tests.py
+		-e TRITON_PROFILE=$(TRITON_PROFILE) \
+		-e GIT_BRANCH=$(GIT_BRANCH) \
+		-v ~/.ssh:/root/.ssh:ro \
+		-v ~/.triton/profiles.d:/root/.triton/profiles.d:ro \
+		-w /src \
+		$(testImage):$(tag) /src/triton.sh
 
+# runs the integration test above but entirely within your local
+# development environment rather than the clean test rig
+test/triton/dev:
+	./test/triton.sh
 
 ## Print environment for build debugging
 debug:
 	@echo WORKSPACE=$(WORKSPACE)
 	@echo GIT_COMMIT=$(GIT_COMMIT)
 	@echo GIT_BRANCH=$(GIT_BRANCH)
+	@echo TRITON_PROFILE=$(TRITON_PROFILE)
 	@echo namespace=$(namespace)
 	@echo tag=$(tag)
 	@echo image=$(image)

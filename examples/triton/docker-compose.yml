@@ -9,13 +9,13 @@ services:
       - CONSUL_AGENT=1
       - ACME_ENV=staging
       - ACME_DOMAIN
-      - CONSUL=nginx-consul.svc.${TRITON_ACCOUNT}.${TRITON_DC}.cns.joyent.com
+      - CONSUL=nc.svc.${TRITON_CNS_SEARCH_DOMAIN_PRIVATE}
     ports:
       - 80
       - 443
       - 9090
     labels:
-      - triton.cns.services=nginx-frontend
+      - triton.cns.services=nf
     network_mode: bridge
 
 
@@ -24,11 +24,11 @@ services:
     mem_limit: 128m
     restart: always
     environment:
-      - CONSUL=nginx-consul.svc.${TRITON_ACCOUNT}.${TRITON_DC}.cns.joyent.com
+      - CONSUL=nc.svc.${TRITON_CNS_SEARCH_DOMAIN_PRIVATE}
     ports:
       - 3001
     labels:
-      - triton.cns.services=nginx-backend
+      - triton.cns.services=nb
     network_mode: bridge
 
 
@@ -52,5 +52,5 @@ services:
       - 8400
       - 8500
     labels:
-      - triton.cns.services=nginx-consul
+      - triton.cns.services=nc
     network_mode: bridge
