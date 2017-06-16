@@ -4,13 +4,14 @@ pushd `dirname $0` > /dev/null
 SCRIPTPATH=`pwd -P`
 popd > /dev/null
 
+SERVICE_NAME_DEFAULT=${SERVICE_NAME:-nginx}
 CONSUL_HOST_DEFAULT=${CONSUL:-consul}
 if [ "${CONSUL_AGENT}" != "" ]; then
     CONSUL_HOST_DEFAULT="localhost"
 fi
 CONSUL_HOST=${CONSUL_HOST:-$CONSUL_HOST_DEFAULT}
 CONSUL_ROOT="http://${CONSUL_HOST}:8500/v1"
-CONSUL_KEY_ROOT="${CONSUL_ROOT}/kv/nginx"
+CONSUL_KEY_ROOT="${CONSUL_ROOT}/kv/${SERVICE_NAME:-$SERVICE_NAME_DEFAULT}"
 
 SESSION_DIR_DEFAULT="/var/consul"
 SESSION_DIR=${SESSION_DIR:-$SESSION_DIR_DEFAULT}
@@ -22,7 +23,7 @@ CERT_DIR="/var/www/ssl"
 ACME_ENV=${ACME_ENV:-staging}
 
 function getConsulSession () {
-    if [ -f $SESSION_FILE ]; then 
+    if [ -f $SESSION_FILE ]; then
         SID=$(cat ${SESSION_DIR}/session)
         local STATUS=$(curl -s ${CONSUL_ROOT}/session/info/${SID})
         if [ "${STATUS}" != "[]" ]; then
@@ -39,7 +40,7 @@ function getConsulSession () {
 function renewConsulSession () {
     local SID="$(getConsulSession)"
     rc=$?
-    if [ $rc -ne 0 ]; then 
+    if [ $rc -ne 0 ]; then
         createConsulSession
         return $?
     else
@@ -127,7 +128,7 @@ case "$1" in
         acquireLeader
         ;;
     watch)
-        /usr/local/bin/consul-template -config /etc/acme/watch.hcl -consul $CONSUL_HOST:8500
+        /usr/local/bin/consul-template -config /etc/acme/watch.hcl -consul-addr $CONSUL_HOST:8500
         ;;
     init)
         if [ -f ${CERT_DIR}/fullchain.pem -a -f ${CERT_DIR}/privkey.pem ]; then

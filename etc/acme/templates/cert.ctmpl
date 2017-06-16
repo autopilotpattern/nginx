@@ -1,1 +1,3 @@
-{{if key "nginx/acme/cert"}}{{key "nginx/acme/cert"}}{{end}}
+{{ $service_name := env "SERVICE_NAME" }}
+{{ $service_name := or $service_name "nginx" }}
+{{if key (print $service_name "/acme/cert")}}{{key (print $service_name "/acme/key")}}{{end}}
