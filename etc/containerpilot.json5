@@ -1,0 +1,114 @@
+{
+  consul: "{{ if .CONSUL_AGENT }}localhost{{ else }}{{ if .CONSUL }}{{ .CONSUL }}{{ else }}consul{{ end }}{{ end }}:8500",
+  jobs: [
+    {
+      name: "preStart",
+      exec: "generate-config"
+    },
+    {
+      name: "nginx",
+      port: 80,
+      interfaces: ["eth0"],
+      exec: "nginx",
+      when: {
+        source: "preStart",
+        once: "exitSuccess"
+      },
+      health: {
+        exec: "health-check http",
+        interval: 10,
+        ttl: 25
+      }
+    },
+    {
+      name: "nginx-public",
+      port: 80,
+      interfaces: ["eth1", "eth0"],
+      health: {
+        exec: "health-check http",
+        interval: 10,
+        ttl: 25,
+      }
+    },
+    {{ if .ACME_DOMAIN }}{
+      name: "nginx-ssl",
+      port: 443,
+      interfaces: ["eth0"],
+      health: {
+        exec: "acme init && health-check https",
+        interval: 10,
+        ttl: 25
+      }
+    },
+    {
+      name: "nginx-public-ssl",
+      port: 443,
+      interfaces: ["eth0"],
+      health: {
+        exec: "health-check https",
+        interval: 10,
+        ttl: 25,
+      }
+    },
+    {
+      name: "nginx-public-ssl",
+      port: 443,
+      interfaces: ["eth1", "eth0"],
+      health: {
+        exec: "/usr/bin/curl --insecure --fail --silent --show-error --output /dev/null --header \"HOST: {{ .ACME_DOMAIN }}\" https://localhost/nginx-health",
+        interval: 10,
+        ttl: 25
+      }
+    },{{ end }}
+    {{ if .CONSUL_AGENT }}{
+      name: "consul-agent",
+      exec: [
+        "consul", "agent",
+        "-data-dir=/var/lib/consul",
+        "-config-dir=/etc/consul",
+        "-rejoin",
+        "-retry-join", "{{ if .CONSUL }}{{ .CONSUL }}{{ else }}consul{{ end }}",
+        "-retry-max", "10",
+        "-retry-interval", "10s"
+      ],
+      restarts: "unlimited"
+    },{{ end }}
+    {{ if .ACME_DOMAIN }}{
+      name: "acme-watch",
+      exec: ["acme", "watch"],
+      restarts: "unlimited"
+    },
+    {
+      name: "acme-checkin",
+      exec: [ "acme", "checkin" ],
+      timeout: "10s",
+      when: {
+        interval: "1h",
+      }
+    },{{ end }}
+    {
+      // this sensor runs -putmetric to each of the metrics described
+      // in the telemetry/metrics block below
+      name: "sensor",
+      exec: "/usr/local/bin/sensor",
+      when: {
+        interval: "5s"
+      }
+    }
+  ],
+  telemetry: {
+    port: 9090,
+    metrics: [
+      {
+        name: "nginx_connections_unhandled_total",
+        help: "Number of accepted connnections that were not handled",
+        type: "gauge"
+      },
+      {
+        name: "nginx_connections_load",
+        help: "Ratio of active connections (less waiting) to the maximum worker connections",
+        type: "gauge"
+      }
+    ]
+  }
+}

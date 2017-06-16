@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -o pipefail
 
-SERVICE_NAME=${SERVICE_NAME:-nginx}
+SERVICE_NAME_DEFAULT=${SERVICE_NAME:-nginx}
 CONSUL_HOST_DEFAULT=${CONSUL:-consul}
 if [ "${CONSUL_AGENT}" != "" ]; then
     CONSUL_HOST_DEFAULT="localhost"
 fi
 CONSUL_HOST=${CONSUL_HOST:-$CONSUL_HOST_DEFAULT}
 CONSUL_ROOT="http://${CONSUL_HOST}:8500/v1"
-CONSUL_KEY_ROOT="${CONSUL_ROOT}/kv/${SERVICE_NAME}"
+CONSUL_KEY_ROOT="${CONSUL_ROOT}/kv/${SERVICE_NAME:-$SERVICE_NAME_DEFAULT}"
 CHALLENGE_PATH="/.well-known/acme-challenge"
 
 function deploy_challenge {

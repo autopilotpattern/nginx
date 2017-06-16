@@ -23,8 +23,8 @@ services:
       - CONSUL=consul
     links:
       - consul:consul
-    ports:
-      - "3001:3001"
+    expose:
+      - 3001
     network_mode: bridge
 
 
@@ -38,8 +38,8 @@ services:
         -ui-dir /ui
     restart: always
     mem_limit: 128m
-    ports:
-      - "8500:8500"
+    expose:
+      - 8500
     expose:
       - 53
       - 8300
