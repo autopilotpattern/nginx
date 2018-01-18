@@ -1,2 +1,3 @@
 CA="https://acme-v01.api.letsencrypt.org/directory"
 WELLKNOWN="/var/www/acme/challenge"
+LICENSE="https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf"
