@@ -11,9 +11,7 @@ services:
     links:
       - consul:consul
     ports:
-      - "8080:80"
-    network_mode: bridge
-
+      - 8080:80
 
   backend:
     image: autopilotpattern/nginx-backend:${TAG:-latest}
@@ -25,21 +23,19 @@ services:
       - consul:consul
     expose:
       - 3001
-    network_mode: bridge
 
 
   consul:
-    image: autopilotpattern/consul:0.7.2-r0.8
+    image: autopilotpattern/consul:${TAG:-latest}
+    environment:
+      - CONSUL=consul
+      - CONSUL_DEV=dev
     command: >
       /usr/local/bin/containerpilot
-      /bin/consul agent -server
-        -bootstrap-expect 1
-        -config-dir=/etc/consul
-        -ui-dir /ui
     restart: always
     mem_limit: 128m
-    expose:
-      - 8500
+    ports:
+      - 8500:8500
     expose:
       - 53
       - 8300
@@ -47,4 +43,3 @@ services:
       - 8302
       - 8400
       - 8500
-    network_mode: bridge
